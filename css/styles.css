@@ -1,0 +1,2282 @@
+/* ============================================================
+   ESTILOS DEL SITIO
+   Escrito mobile first: los estilos base son para celular,
+   y los @media (min-width) van agrandando para tablet/desktop.
+   ============================================================ */
+
+/* --- Reset mínimo --- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body, h1, h2, h3, p, ul, li { margin: 0; padding: 0; }
+
+ul { list-style: none; }
+
+img, svg { display: block; max-width: 100%; }
+
+/* El atributo hidden debe ganarle a la regla de arriba.
+   Sin esto, un <img hidden> se sigue mostrando. */
+[hidden] { display: none !important; }
+
+a { color: inherit; text-decoration: none; }
+
+html { scroll-behavior: smooth; }
+
+/* Cuando se salta a una sección desde el menú, el scroll se frena antes
+   para que el header sticky no le tape la parte de arriba. */
+main > section[id] {
+  scroll-margin-top: var(--scroll-offset);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   FONDO ANIMADO — CIELO ESTRELLADO
+   Canvas fijo, detrás de todo el contenido (z-index negativo, ver
+   nota en js/main.js sobre por qué eso alcanza sin más trucos).
+   No intercepta clics ni se lee con lector de pantalla.
+   ============================================================ */
+
+.fondo-red {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* En modo espacio se puede arrastrar (ver "ARRASTRAR PARA NAVEGAR" en
+   js/main.js): ahí sí necesita recibir el puntero. El resto del
+   tiempo sigue sin bloquear clics (pointer-events: none de arriba). */
+html.modo-espacio .fondo-red {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+html.modo-espacio .fondo-red.arrastrando {
+  cursor: grabbing;
+}
+
+
+/* ============================================================
+   BOTÓN "VER LAS ESTRELLAS" + MODO ESPACIO
+
+   El botón flota fijo en la pantalla (va con el scroll). Al
+   activarlo, ".modo-espacio" en el <html> esconde header/main/footer
+   y deja SOLO el fondo animado (que sigue detrás, sin tocarlo) más
+   este mismo botón, para poder volver.
+   ============================================================ */
+
+.boton-espacio {
+  position: fixed;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  z-index: 200;   /* por encima de todo, incluso del header fixed */
+  padding: 11px 20px;
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-item);
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+              opacity 0.3s ease;
+
+  /* Oculto por defecto: el JS ("VISIBILIDAD DEL BOTÓN VER LAS
+     ESTRELLAS") lo muestra solo entre el Stack tecnológico y el pie
+     de página. */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.boton-espacio.es-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* En modo espacio tiene que verse SIEMPRE, fijo abajo a la derecha:
+   es la única forma de volver, sin importar en qué parte de la
+   página (incluso ya anclada) se activó. */
+html.modo-espacio .boton-espacio {
+  position: fixed;
+  top: auto;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Glassmorphism: mismo tratamiento que ".recientes-grid"/".site-footer"
+   (traslúcido + blur), en vez de rellenarse de naranja. El naranja de
+   marca queda reservado para el botón "Conectemos" (.nav-cta). */
+.boton-espacio:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* El contenido normal se apaga (no display:none: así no se pierde el
+   scroll ni hay que recalcular el layout al volver) y no se puede ni
+   ver ni tocar. El botón y el fondo animado quedan afuera de esta
+   regla a propósito. */
+html.modo-espacio {
+  overflow: hidden;   /* congela el scroll mientras se mira el cielo */
+}
+
+html.modo-espacio .site-header,
+html.modo-espacio main,
+html.modo-espacio .site-footer,
+html.modo-espacio .progreso {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.modo-espacio .site-header,
+  html.modo-espacio main,
+  html.modo-espacio .site-footer,
+  html.modo-espacio .progreso { transition: none; }
+}
+
+/* ============================================================
+   APARICIÓN AL HACER SCROLL
+   Desvanecido + 12px de desplazamiento. La curva es un "expo out":
+   arranca rápido y frena suave, sin rebotes ni recorridos largos.
+   Solo se oculta si hay JavaScript (clase js-anim en <html>), para
+   que sin JS la página se vea completa aunque no anime.
+   ============================================================ */
+
+.js-anim [data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  /* La duración vive SOLO acá. El JS la lee del estilo calculado para
+     saber cuándo limpiar, así no hay dos números que puedan desfasarse. */
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js-anim [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Quien pide menos animación en su sistema ve todo directamente */
+@media (prefers-reduced-motion: reduce) {
+  .js-anim [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ============================================================
+   LOS DOS IDIOMAS
+
+   Cada texto está escrito dos veces en el HTML, en dos <span> con
+   lang="en" y lang="es". Acá se muestra solo el del idioma elegido,
+   que vive en el atributo data-idioma del <html>.
+
+   Los selectores arrancan con "body" a propósito: sin eso, el
+   [lang="es"] también agarraría al <html lang="es"> y escondería la
+   página entera.
+
+   Por defecto se ve el inglés, así que sin JavaScript el sitio se ve
+   completo igual.
+   ============================================================ */
+
+body [lang="es"] { display: none; }
+
+html[data-idioma="es"] body [lang="es"] { display: inline; }
+html[data-idioma="es"] body [lang="en"] { display: none; }
+
+
+/* --- Selector de idioma: pill con borde, estilo "outline" ---
+   Mismo lenguaje visual que .btn-secundario (borde fino, fondo
+   transparente): un botón por idioma, el elegido queda relleno. --- */
+.idioma-toggle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: auto;   /* junto al nombre; empuja el resto a la derecha */
+  padding: 2px;
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-item);
+}
+
+.idioma-boton {
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-item);
+  background: none;
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: 0.8125rem;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.idioma-boton.is-active {
+  background-color: var(--color-fill-strong);
+  color: var(--color-on-fill-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idioma-boton { transition: none; }
+}
+
+
+/* ============================================================
+   BARRA DE PROGRESO DE LECTURA
+
+   Vive pegada arriba del todo, por ENCIMA del header (111 contra 100),
+   y se ancha de 0 a 100% según cuánto llevás scrolleado. El ancho lo
+   escribe el JS; acá solo está la caja y el color. --- */
+.progreso {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 111;
+  height: 3px;
+  background: transparent;   /* sin riel: solo se ve la barra que avanza */
+}
+
+.progreso-barra {
+  height: 100%;
+  width: 0%;
+  background-color: var(--color-accent);
+  /* El ancho lo cambia el JS en cada cuadro de scroll; una transición
+     acá lo haría sentir con retraso, como si arrastrara los pies. */
+}
+
+
+/* --- Señal para seguir bajando, al pie del hero --- */
+.scroll-cue {
+  margin-top: 48px;
+  display: flex;
+  justify-content: center;
+}
+
+.scroll-cue-linea {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(var(--color-accent), transparent);
+  animation: scroll-cue-caer 1.8s ease-in-out infinite;
+}
+
+@keyframes scroll-cue-caer {
+  0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  40%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  60%  { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* Se apaga al empezar a scrollear (ver "SEÑAL DE SCROLL" en js/main.js) */
+.scroll-cue.se-oculta {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-linea { animation: none; height: 24px; }
+}
+
+
+/* Foco visible para quien navega con teclado */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+
+/* ============================================================
+   HEADER / NAVEGACIÓN
+   Barra translúcida de ancho completo: los links a la izquierda
+   y la marca (ícono + nombre) a la derecha, dentro de la misma barra.
+   ============================================================ */
+
+.site-header {
+  /* "fixed" y no "sticky": tiene que quedar FLOTANDO sobre el
+     contenido (el degradado del Hello incluido), no empujarlo hacia
+     abajo ocupando su propio lugar en la página. Por eso las demás
+     páginas (que no tienen una foto detrás) le suman el alto del
+     header como padding arriba, en .pagina-intro. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  width: 100%;
+
+  /* Sin fondo: se lee directamente sobre lo que haya detrás (el
+     degradado del Hello, o el fondo de la página en el resto). */
+  background-color: transparent;
+}
+
+/* Solo en index.html: el header queda arriba del degradado naranja
+   del Hello (ver .hero-fondo), así que el texto pasa a blanco para
+   poder leerse. En el resto de páginas NO lleva esta clase, y el
+   texto usa su color normal sobre el fondo claro/oscuro de siempre. */
+/* ".nav-cta" queda afuera a propósito: es un botón blanco sólido
+   (ver .nav-cta), su texto tiene que seguir siendo oscuro para
+   leerse, no blanco como el resto del menú. */
+.site-header.header-hero .nav-item:not(.nav-cta),
+.site-header.header-hero .brand-nombre {
+  color: var(--color-hero-texto);
+}
+
+.site-header.header-hero .nav-toggle-linea {
+  background-color: var(--color-hero-texto);
+}
+
+.site-header.header-hero .idioma-toggle { border-color: var(--color-hero-texto); }
+.site-header.header-hero .idioma-boton { color: var(--color-hero-texto); }
+
+/* Al scrollear (JS, "HEADER SÓLIDO AL SCROLLEAR" en main.js) el header
+   se pone un fondo, para no quedar flotando en blanco/transparente
+   sobre el contenido normal de la página una vez que el degradado del
+   Hello quedó arriba, fuera de la pantalla. */
+.site-header.header-solido {
+  background-color: var(--color-nav-surface);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+}
+
+.site-header.header-solido.header-hero .nav-item:not(.nav-cta),
+.site-header.header-solido.header-hero .brand-nombre {
+  color: var(--color-ink);
+}
+
+.site-header.header-solido.header-hero .nav-toggle-linea {
+  background-color: var(--color-ink);
+}
+
+.site-header.header-solido.header-hero .idioma-toggle { border-color: var(--color-ink); }
+.site-header.header-solido.header-hero .idioma-boton { color: var(--color-ink); }
+
+/* --- Botón hamburguesa (solo en celular) ---
+   Se muestra abajo, en el bloque de "hasta 599px". Acá arriba está
+   oculto porque el CSS del proyecto se escribe primero para celular
+   pero este botón es la excepción: por defecto NO existe. --- */
+.nav-toggle {
+  display: none;
+  /* 44x44: el mínimo táctil */
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.nav-toggle-linea {
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--color-ink);
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+/* Abierto: las tres rayas se convierten en una X */
+.site-header.menu-abierto .nav-toggle-linea:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.site-header.menu-abierto .nav-toggle-linea:nth-child(2) { opacity: 0; }
+.site-header.menu-abierto .nav-toggle-linea:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-toggle-linea { transition: none; }
+}
+
+
+/* --- Fila de links (ya sin fondo ni borde propios) --- */
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+
+  /* En pantallas chicas los items no caben: la fila se desliza
+     horizontalmente en vez de romper el layout. */
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  /* Acá había un margen negativo para que el TEXTO de "Hello!" quedara
+     pegado al margen de la página. Se quitó porque el item activo tiene
+     fondo oscuro: lo que se veía tocando el borde era la pastilla, y
+     quedaba apretada contra el filo.
+
+     Sin el margen, lo que alinea con el margen de página es el borde de
+     la pastilla, igual que del otro lado alinea el borde del botón
+     "Get in touch". Los dos extremos quedan simétricos. */
+}
+
+.nav-pill::-webkit-scrollbar { display: none; }
+
+/* --- Cada item de navegación --- */
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 12px arriba y abajo = 44px de alto: mínimo táctil en móvil.
+     En desktop vuelve a los 40px del Figma. */
+  padding: 12px var(--nav-pad-x);
+  border-radius: var(--radius-item);
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-base);
+  line-height: 20px; /* fija la altura del item en 40px como en el Figma */
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-muted);
+  opacity: 0.85;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-item:hover {
+  opacity: 1;
+  color: var(--color-ink);
+  background-color: rgba(242, 239, 233, 0.1);
+}
+
+/* --- "Get in touch": botón sólido blanco, con la flechita en un
+   círculo naranja adentro. Va siempre en blanco, sea cual sea el
+   fondo (la foto del Hello, o el fondo claro/oscuro del resto de
+   páginas), para no tener que pensar en contraste caso por caso. --- */
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: 12px;
+  /* 11 + 11 + línea + borde ≈ 44px, el mismo alto que el resto de
+     botones outline del sitio (.btn-secundario, .idioma-toggle). */
+  padding: 11px 20px;
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-item);
+  background-color: transparent;
+  color: var(--color-ink);
+  font-weight: var(--weight-semibold);
+  opacity: 1;        /* no se atenúa como los items del menú */
+  flex-shrink: 0;    /* no se aplasta cuando falta lugar */
+}
+
+.nav-cta:hover {
+  background-color: var(--color-fill-strong);
+  border-color: var(--color-fill-strong);
+  color: var(--color-on-fill-strong);
+}
+
+.nav-cta-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-cta-icono img {
+  /* El archivo (assets/img/icon-arrow.svg) es blanco fijo: como el
+     texto del sitio también es claro (--color-ink), coincide solo,
+     sin necesidad de filtro. Sobre el fondo naranja del hover
+     también se lee bien. */
+  width: 14px;
+  height: 14px;
+  transform: rotate(90deg);
+}
+
+/* Hay DOS copias del botón "Let's connect": una dentro del menú
+   hamburguesa (.nav-pill) y otra en la barra (.brand). Por defecto
+   (tablet/desktop) se ve la de la barra; el bloque "hasta 599px" más
+   abajo invierte cuál se ve, para que en celular viva en el menú y
+   libere espacio en la barra de arriba. */
+.nav-pill .nav-cta { display: none; }
+
+/* --- Nombre, a la izquierda de todo --- */
+.brand-nombre {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: 1.125rem;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* --- Bloque de la derecha (botón + ajustes) --- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* --- Celular: los links viven detrás del hamburguesa ---
+   El panel se despliega por debajo de la barra, a todo el ancho, con
+   la misma superficie translúcida del header. --- */
+@media (max-width: 599px) {
+  .nav-toggle { display: flex; }
+
+  .nav-pill {
+    /* Cuelga del borde de abajo del header, que es sticky y por eso
+       sirve de referencia sin tener que tocarlo. */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 8px var(--space-5) 16px;
+    margin-left: 0;      /* anula el margen negativo de escritorio */
+    overflow: visible;   /* ya no necesita deslizarse de costado */
+
+    /* Casi opaco: si fuera tan translúcido como la barra, se leería el
+       contenido de atrás por debajo de los links. */
+    background-color: var(--color-nav-surface-abierta);
+    backdrop-filter: blur(var(--blur-nav));
+    -webkit-backdrop-filter: blur(var(--blur-nav));
+    border-bottom: 1px solid var(--color-border);
+
+    /* Cerrado. Se usa visibility además de la transparencia para que,
+       mientras está cerrado, tampoco se alcance con el tabulador. */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  }
+
+  .site-header.menu-abierto .nav-pill {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  /* Acá se invierte cuál de las dos copias del botón se ve: en celular
+     vive en el menú, no en la barra. */
+  .nav-pill .nav-cta { display: flex; }
+  .brand .nav-cta { display: none; }
+
+  /* Dentro del menú, "Let's connect" se lee como un item más de la
+     lista (mismo tipo y peso que "Hello!", "UX/UI", etc.), no como el
+     botón blanco que es en la barra. */
+  .nav-pill .nav-cta {
+    margin-left: 0;
+    padding: 12px var(--nav-pad-x);
+    background-color: transparent;
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-weight: var(--weight-regular);
+    opacity: 0.6;
+  }
+
+  .nav-pill .nav-cta:hover { opacity: 1; }
+  .nav-pill .nav-cta-icono { display: none; }
+
+  /* Con el menú abierto, la barra se pone igual de opaca que el panel.
+     Si no, se vería un escalón entre las dos, porque son el mismo color
+     con distinta transparencia. */
+  .site-header.menu-abierto {
+    background-color: var(--color-nav-surface-abierta);
+  }
+}
+
+@media (max-width: 599px) and (prefers-reduced-motion: reduce) {
+  .nav-pill { transition: none; }
+}
+
+/* --- Tablet --- */
+@media (min-width: 600px) {
+  :root { --nav-pad-x: 24px; }
+}
+
+/* --- Desktop --- */
+@media (min-width: 1024px) {
+  :root {
+    --nav-pad-x: var(--space-10);
+    --scroll-offset: 96px;   /* 72 del header + 24 de aire */
+  }
+
+  .site-header {
+    height: var(--header-height);
+    padding: 0 var(--space-10);   /* el alto lo fija --header-height */
+  }
+
+  .nav-pill { overflow-x: visible; }
+
+  /* Vuelve a los 40px de alto del Figma (en móvil son 44 por el táctil) */
+  .nav-item { padding: var(--space-3) var(--nav-pad-x); }
+}
+
+
+/* ============================================================
+   HELLO! — sección de presentación (hero)
+   ============================================================ */
+
+.hero {
+  position: relative;
+
+  /* Centro del resplandor de .hero-fondo::after. El JS ("DEGRADADO
+     QUE SIGUE AL MOUSE") las pisa acá mismo, en .hero, al mover el
+     mouse; heredan hacia abajo hasta el ::after sin que haga falta
+     tocarlas ahí. */
+  --mouse-x: 70%;
+  --mouse-y: 20%;
+
+  /* Ocupa TODO el ancho de la pantalla, no un bloque angosto como el
+     resto de las secciones: por eso no lleva max-width ni margin auto. */
+  width: 100%;
+  /* 120px arriba: dejan pasar el header fijo (que flota encima, no
+     empuja el contenido) antes de que empiece el texto. */
+  padding: 120px var(--space-5) 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  overflow: hidden;
+}
+
+/* Hero con las medidas del Figma en desktop.
+   OJO: este bloque va DESPUÉS de la regla base .hero de arriba. Si se
+   mueve antes, pierde por orden (misma especificidad) y el hero se queda
+   con el padding de móvil sin que nada lo delate. */
+@media (min-width: 1024px) {
+  .hero { padding: 140px var(--space-25) 40px; min-height: 100vh; }
+}
+
+/* --- Fondo de foto + degradado ---
+   La foto (assets/about/foto.jpg, la misma de "About me") cubre TODA
+   la tarjeta, y el degradado de acento la tiñe para que se lea como
+   una sola pieza de color y el texto blanco de encima se pueda leer,
+   sin importar qué tan clara u oscura venga la foto original. --- */
+.hero-texto {
+  /* Baja el bloque de texto dentro de la tarjeta, en vez de arrancar
+     pegado al borde de arriba (justo debajo del header). */
+  margin-top: clamp(32px, 12vw, 140px);
+}
+
+.hero-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Fondo real detrás del video: se ve a la izquierda, donde el
+     video no llega. */
+  background-color: var(--color-hero-bg);
+}
+
+.hero-fondo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  filter: grayscale(0.35) contrast(1.1);
+}
+
+/* El video ya no ocupa todo el ancho: vive pegado a la derecha, más
+   angosto, y se apaga con un degradado hacia la izquierda para que
+   se funda con el negro de fondo en vez de cortarse de golpe. */
+.hero-fondo video {
+  position: absolute;
+  inset: 0 0 0 auto;
+  right: 0;
+  width: 70%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top 85%;
+  filter: grayscale(0.35) contrast(1.1) brightness(0.7);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 30%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 30%);
+}
+
+.hero-fondo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  /* Sin color: solo oscurece (multiply con negro/gris), para que no
+     tiña el video de naranja o rojo. */
+  background:
+    radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(0, 0, 0, 0.4) 0%, transparent 60%),
+    linear-gradient(160deg, rgba(0, 0, 0, 0.1) 0%, var(--color-hero-bg) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Todo lo demás dentro de .hero va POR ENCIMA del fondo. */
+.hero > *:not(.hero-fondo) {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Antetítulo: "I'm Cristian, Product Designer" --- */
+.hero-eyebrow {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-eyebrow);
+  line-height: 1;
+  letter-spacing: -0.48px;
+  color: var(--color-hero-texto);
+}
+
+.hero-eyebrow .is-accent { color: var(--color-hero-texto); text-decoration: underline; text-decoration-color: var(--color-accent); text-underline-offset: 4px; }
+
+/* --- Bloque de la cita: ícono + titular + párrafo --- */
+.hero-quote {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 25px;
+}
+
+.hero-quote-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+/* Botón "Currículum" del Hello, debajo de las categorías. Va en
+   blanco (el borde/color normal de .btn-secundario, pensado para
+   fondo claro, no se vería sobre la foto). */
+.btn-secundario.hero-cv {
+  margin-top: 48px;
+  border-color: var(--color-hero-texto);
+  color: var(--color-hero-texto);
+}
+
+.btn-secundario.hero-cv:hover {
+  background-color: var(--color-hero-texto);
+  color: var(--color-hero-bg);
+}
+
+/* Salto de línea que solo existe en desktop (ver .hero-headline) */
+.br-desktop { display: none; }
+
+.hero-headline {
+  max-width: 973px;
+  /* Reparte el texto en líneas parejas cuando no hay salto forzado */
+  text-wrap: balance;
+  font-family: var(--font-black);
+  font-weight: var(--weight-regular);
+  /* Más grande que el resto de los titulares del sitio: acá es el
+     único texto de la sección, tiene que notarse. */
+  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  line-height: 1.08;
+  /* 2 líneas siempre, aunque la palabra que rota sola (UX/UI → Visual →
+     3D, ver js/main.js) sea corta y el texto entraría en 1 sola línea:
+     sin esto, cada vez que rota a "3D" el título se achica y todo lo
+     de abajo pega un salto hacia arriba. */
+  min-height: 2.16em;
+  letter-spacing: -0.72px;
+  color: var(--color-hero-texto);
+}
+
+/* --- Palabra que rota sola (UX/UI → Visual → 3D) ---
+   "steps()" en vez de una curva suave: hace que el cambio salte en
+   pasos bruscos en vez de deslizarse, que es lo que da el efecto de
+   "pixelado" al aparecer/desaparecer (ver el JS que agrega/saca
+   ".se-va" cada 3 segundos). --- */
+.hero-palabra-rotativa {
+  display: inline-block;
+  color: var(--color-accent);
+  transition: opacity 0.35s steps(6, end),
+              filter 0.35s steps(6, end),
+              transform 0.35s steps(6, end);
+}
+
+.hero-palabra-rotativa.se-va {
+  opacity: 0;
+  filter: blur(7px);
+  transform: scale(0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-palabra-rotativa { transition: none; }
+}
+
+.hero-lead {
+  max-width: 902px;
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-lead);
+  line-height: 1.338;
+  letter-spacing: -0.3px;
+  color: var(--color-hero-muted);
+}
+
+/* --- Fila de categorías, al fondo de la tarjeta ---
+   Son las mismas 3 páginas del menú (UX/UI, Branding, 3D): un remate
+   real, no números inventados. margin-top:auto la empuja al fondo
+   de la tarjeta en desktop, donde el hero tiene alto mínimo. --- */
+.hero-categorias {
+  align-self: stretch;
+  margin-top: 48px;
+  padding-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 40px;
+}
+
+.hero-categorias a {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 240px;
+  font-family: var(--font-ui);
+  color: var(--color-hero-texto);
+}
+
+.hero-categoria-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-weight: var(--weight-semibold);
+  font-size: 0.9375rem;
+}
+
+.hero-categorias a:hover .hero-categoria-titulo { text-decoration: underline; }
+
+.hero-categoria-desc {
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--color-hero-muted);
+}
+
+.hero-categoria-num {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+}
+
+.hero-categoria-num::before { content: "#"; }
+
+/* --- Botón violeta "Featured projects" --- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: 40px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-item);
+  /* Borde hacia adentro, para no sumarle alto al botón */
+  box-shadow: inset 0 0 0 0.5px var(--color-border-soft);
+  background-color: var(--color-accent);
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-button);
+  line-height: 24px;
+  letter-spacing: -0.3px;
+  color: var(--color-white);
+  white-space: nowrap;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+/* Caja del ícono: 25x24 en el Figma, con la flecha de 17px adentro */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.btn-icon img {
+  width: 17px;
+  height: 17px;
+  transform: rotate(180deg); /* la flecha apunta hacia abajo, como en el Figma */
+}
+
+
+/* ============================================================
+   TÍTULO DE PÁGINA — encabezado de las páginas de categoría
+   (ux-ui.html, branding.html, 3d-modeling.html). Ocupa el lugar
+   donde antes estaba "Projects" dentro del home.
+   ============================================================ */
+
+/* Fondo del hero: degradado naranja a pantalla completa (mismo
+   naranja de marca, --color-accent, en dos manchas suaves que se
+   funden con el negro de fondo) detrás del título de cada página de
+   categoría. Full-bleed a propósito, por eso NO tiene max-width acá:
+   el ancho de lectura lo pone .pagina-intro-contenido, adentro. */
+.pagina-intro {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-bg);
+}
+
+.pagina-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Las manchas de color solo viven arriba (0% a 65% del alto): de
+     ahí para abajo son 100% transparentes, así el negro de fondo va
+     "ganando" solo, sin ningún borde recto. */
+  background:
+    radial-gradient(ellipse 70% 55% at 15% 0%, color-mix(in srgb, var(--color-accent) 68%, transparent), transparent 70%),
+    radial-gradient(ellipse 65% 50% at 85% 0%, color-mix(in srgb, var(--color-accent) 52%, transparent), transparent 70%),
+    radial-gradient(ellipse 90% 65% at 50% 10%, color-mix(in srgb, var(--color-accent) 28%, transparent), transparent 75%),
+    /* Base: mismo tono y ángulo que el degradado del Hello en el home
+       (naranja de marca hacia el marrón oscuro de .hero-bg), para que
+       las dos páginas se sientan de la misma familia de color. Se
+       mezcla con el marrón oscuro (no naranja puro) para que quede
+       oscuro, pero con más naranja que antes para que se note más
+       saturado. */
+    linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 72%, var(--color-hero-bg)) 0%, var(--color-hero-bg) 100%);
+  filter: blur(80px);
+}
+
+/* Encima del degradado, un velo que lo va apagando hacia abajo hasta
+   fundirse del todo en negro: sin este velo, el degradado de arriba
+   se corta de golpe donde termina la sección (justo lo que se veía
+   "plano y recto"). */
+.pagina-intro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, var(--color-bg) 85%);
+}
+
+/* --- Variante con foto de fondo (por ahora solo ux-ui.html) ---
+   Mismo mecanismo que ".hero-fondo" del home: la foto detrás, y
+   encima un degradado naranja en "multiply" que sigue al mouse (ver
+   "--mouse-x/--mouse-y" y el JS "DEGRADADO QUE SIGUE AL MOUSE",
+   generalizado para engancharse acá también). Reemplaza a las manchas
+   sintéticas de ".pagina-intro::before/::after": con foto de verdad,
+   ya no hacen falta. */
+.pagina-intro-foto {
+  --mouse-x: 70%;
+  --mouse-y: 20%;
+}
+
+.pagina-intro-foto::before,
+.pagina-intro-foto::after {
+  content: none;
+}
+
+.pagina-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.pagina-fondo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: grayscale(0.35) contrast(1.1) brightness(0.35);
+  opacity: 0.6;
+}
+
+.pagina-fondo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--color-accent) 0%, transparent 60%),
+    linear-gradient(160deg, var(--color-accent) 0%, var(--color-hero-bg) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* La foto se ve solo donde el degradado es naranja (arriba): de ahí
+   para abajo se va apagando hasta el negro de fondo, en vez de
+   cortarse de golpe donde termina la sección. */
+.pagina-fondo img {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 85%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 85%);
+}
+
+.pagina-fondo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, var(--color-bg) 85%);
+}
+
+.pagina-intro-contenido {
+  position: relative;
+  z-index: 1;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  /* 340px arriba: deja pasar el header fijo (que flota encima del
+     contenido y ya no empuja nada hacia abajo, ver .site-header) más
+     bastante aire extra antes del título, para bajar todo el bloque. */
+  padding: 260px var(--space-5) 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* Antetítulo naranja: el nombre de la categoría, arriba del titular
+   grande. Mismo rol que .hero-eyebrow en el home, pero sin el
+   subrayado (acá no hay ninguna palabra para destacar aparte). */
+.pagina-eyebrow {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-eyebrow);
+  color: var(--color-accent);
+}
+
+.pagina-titulo {
+  font-family: var(--font-black);
+  font-size: var(--text-headline);
+  color: var(--color-ink);
+}
+
+.pagina-desc {
+  max-width: 60ch;
+  margin-top: var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-lead);
+  line-height: 1.3;
+  /* --color-modal-desc en vez de --color-muted: mismo pedido de más
+     contraste que ya se hizo para la descripción del modal de
+     proyecto (ver tokens.css). .project-desc sigue en #696969. */
+  color: var(--color-modal-desc);
+}
+
+/* --- Fila de especialidades numeradas (#01, #02...) + años de
+   experiencia, debajo de la descripción. En celular se apilan de a
+   dos columnas; en desktop, todas en una sola fila con espacio parejo. --- */
+.pagina-stats {
+  width: 100%;
+  max-width: 720px;
+  margin-top: 156px;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-border-soft);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px 24px;
+  text-align: left;
+}
+
+@media (min-width: 1024px) {
+  .pagina-stats {
+    max-width: none;
+    grid-template-columns: repeat(7, auto);
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+.pagina-stat-num {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: 0.9375rem;
+  color: var(--color-accent);
+}
+
+.pagina-stat-titulo {
+  display: block;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  font-size: 0.9375rem;
+  color: var(--color-ink);
+}
+
+/* El primer ítem ("+4 years experience") no tiene número: se destaca
+   solo, en naranja y un poco más grande, para que se lea como un
+   dato aparte de la lista. */
+.pagina-stat-destacado {
+  text-align: left;
+}
+
+.pagina-stat-destacado .pagina-stat-titulo {
+  color: var(--color-accent);
+  font-size: 1.375rem;
+  line-height: 1.25;
+}
+
+
+/* ============================================================
+   PROJECTS — tarjeta blanca + carrusel de capturas
+   ============================================================ */
+
+.projects {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 var(--space-5) 96px;
+  /* Separación entre un proyecto y el siguiente */
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  /* Referencia para posicionar el marco blanco que viaja por detrás */
+  position: relative;
+
+
+  /* Arranca la cuenta "01, 02, 03…" que enumera cada .project-card.
+     Es CSS puro: si se agrega o reordena un proyecto, la numeración se
+     acomoda sola, sin tocar ningún <article>. */
+  counter-reset: proyecto;
+}
+
+.project-card { counter-increment: proyecto; }
+
+/* El número queda antes del año, en violeta, como una pequeña marca de
+   progreso ("vas por el 03 de 6") más que como un dato del proyecto */
+.project-period::before {
+  content: counter(proyecto, decimal-leading-zero) " — ";
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+}
+
+/* --- El marco blanco que viaja ---
+   NO es el fondo de cada proyecto: es UN SOLO rectángulo blanco que
+   vive detrás de todos y se estira de uno al siguiente según dónde
+   estés mirando (ver "MARCO BLANCO" en js/main.js).
+
+   Lo crea el JavaScript. Si no hay JS, este elemento no existe y cada
+   proyecto usa su propio fondo blanco, que es el respaldo de abajo. */
+.projects-frame {
+  position: absolute;
+  left: var(--space-5);
+  right: var(--space-5);
+  top: 0;
+  height: 0;
+  border-radius: var(--radius-card);
+  /* Glassmorphism: mismo tratamiento que ".recientes-grid" en el home
+     (traslúcido + blur), para que el fondo estrellado se note detrás. */
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;  /* no se interpone con los clics */
+}
+
+/* --- El bloque de proyecto ---
+   En celular y tablet se apila (texto arriba, carrusel abajo);
+   desde desktop pasa a dos columnas. --- */
+.project-card {
+  /* Margen interno lateral. Cambia en desktop y lo usan tanto el
+     padding de la tarjeta como el del texto. */
+  --pad-x: var(--space-5);
+
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+
+  /* Sin padding derecho: el carrusel llega hasta el borde de la
+     tarjeta y la captura siguiente se corta contra el filo. */
+  padding: 28px 0 16px var(--pad-x);
+
+  border-radius: var(--radius-card);
+  /* Recorta la captura que asoma, siguiendo la curva de la esquina */
+  overflow: hidden;
+  /* Para que se dibuje por ENCIMA del marco blanco */
+  position: relative;
+
+  /* Respaldo: si no hay JavaScript, cada proyecto lleva su propio
+     fondo (mismo glassmorphism que .projects-frame) y la sección se
+     ve igual, solo que sin la animación de estiramiento. */
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* La opacidad NO se define acá: la escribe el JS según qué tan
+     cerca está el proyecto del centro de la pantalla. */
+}
+
+/* Con el marco animado en marcha, el blanco lo pone ÉL: si cada
+   tarjeta conservara el suyo, no se vería el estiramiento. */
+.projects.tiene-marco .project-card {
+  /* El borde y el fondo ya los pone el marco animado (.projects-frame)
+     por detrás: si cada tarjeta conserva los suyos, se ven dos cajas
+     con esquinas redondeadas superpuestas, con un corte feo entre
+     una tarjeta y la siguiente. */
+  background-color: transparent;
+  border-color: transparent;
+}
+
+/* --- Columna de texto --- */
+.project-info {
+  /* El texto sí respeta el margen derecho; el carrusel no. */
+  padding-right: var(--pad-x);
+}
+
+/* El año, arriba del nombre y en gris */
+.project-period {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+}
+
+.project-name {
+  margin-top: 12px;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: clamp(1.5rem, 2.09vw, 1.875rem);   /* 24 → 30px */
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-accent);
+}
+
+/* Bajada de una línea que describe qué es el producto */
+.project-subtitle {
+  margin-top: 8px;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-lead);
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.project-desc {
+  margin-top: 20px;
+  /* SIN max-width. Decisión de Cristian: el texto llena todo el ancho
+     disponible de su columna. No agregar un tope de medida de lectura. */
+  font-family: var(--font-body);
+  font-size: var(--text-project-desc);
+  line-height: 1.3;          /* 130%, definido por Cristian */
+  color: var(--color-muted); /* #696969, definido por Cristian */
+}
+
+/* --- Zona del carrusel --- */
+.project-gallery {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* deja que la pista se encoja en vez de desbordar */
+
+  /* Cuánto mide una captura dentro de la pista. Lo que sobra es lo que
+     deja asomar la siguiente. Se guarda en una variable porque los
+     controles (← 1/9 →) la necesitan para quedar centrados bajo la
+     imagen y no bajo la pista entera. */
+  --slide-w: 88%;
+}
+
+/* La pista: se desliza horizontalmente y se frena en cada captura.
+   Este scroll vive DENTRO del bloque; la página nunca scrollea de lado. */
+.gallery-track {
+  display: flex;
+  gap: 23px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  cursor: grab;              /* avisa que se puede arrastrar */
+  /* Se permiten los dos ejes, no solo pan-x. Es contraintuitivo, pero
+     "pan-x" no significa "prioriza lo horizontal": significa "el
+     navegador SOLO puede paniar en horizontal acá", así que si el toque
+     arrancaba sobre una imagen, el scroll vertical de la página quedaba
+     desactivado para todo ese gesto, aunque el dedo se moviera para
+     arriba. Con los dos ejes permitidos, el navegador deja pasar el
+     gesto que corresponda: horizontal cambia de captura, vertical
+     scrollea la página. */
+  touch-action: pan-x pan-y;
+}
+
+.gallery-track.is-dragging {
+  cursor: grabbing;
+  user-select: none;         /* que no seleccione texto al arrastrar */
+}
+
+.gallery-track::-webkit-scrollbar { display: none; }
+
+.gallery-slide {
+  flex: 0 0 var(--slide-w);
+  scroll-snap-align: start;
+  margin: 0;
+}
+
+/* El botón solo aporta el clic y el foco de teclado: no debe verse */
+.gallery-zoom {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+}
+
+/* Mientras se arrastra manda el cursor de agarre, no el de ampliar */
+.gallery-track.is-dragging .gallery-zoom { cursor: grabbing; }
+
+.gallery-slide img {
+  width: 100%;
+  /* Cada proyecto adopta la proporción de sus propias capturas: el JS
+     mide la primera y la escribe en --ratio-captura. El 16/9 es solo
+     el valor de arranque, para que no salte antes de medirla. */
+  aspect-ratio: var(--ratio-captura, 16 / 9);
+  object-fit: contain;   /* red de seguridad si alguna no coincide */
+  border-radius: var(--radius-media);
+
+  /* Contorno gris muy suave: hay capturas con fondo blanco que si no
+     se funden con el blanco de la tarjeta y no se ve dónde terminan.
+
+     Va con box-shadow, y no con border ni con outline. Las tres formas
+     dibujan una línea, pero solo esta queda limpia:
+
+     - outline dibuja su propia curva en las esquinas y no calza con la
+       del radio: se ve sucio.
+     - border sí calza, pero achica la caja interior 2px. Como la
+       proporción se aplica a la caja CON borde y object-fit encaja la
+       imagen en la caja SIN borde, sobraba 1px de franja clara a los
+       costados, que en las capturas oscuras se veía como una línea de
+       más.
+     - box-shadow se dibuja por fuera, sigue el radio exacto y no toca
+       la caja interior. */
+  box-shadow: 0 0 0 1px var(--color-border-soft);
+}
+
+/* --- Controles --- */
+.gallery-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  /* Antes acá iba el pie de foto y este espacio lo daba él. Al quitarlo,
+     el aire pasa a los controles para que no queden pegados a la
+     captura. */
+  margin-top: 32px;
+
+  /* La pista es más ancha que la captura visible (lo que sobra es el
+     asomo de la siguiente). Descontando esa diferencia, el grupo de
+     controles queda centrado bajo la IMAGEN, no bajo la pista. */
+  padding-right: calc(100% - var(--slide-w));
+}
+
+.gallery-counter {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  color: var(--color-muted); /* #696969, definido por Cristian */
+  min-width: 48px;
+  text-align: center;
+}
+
+/* Botones de flecha: 44x44 para que se puedan tocar en celular */
+.gallery-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-accent);
+}
+
+.gallery-btn:disabled {
+  color: var(--color-disabled);
+  cursor: default;
+}
+
+/* La flecha es un SVG incrustado (ver FLECHA en js/main.js) y toma el
+   color del botón, así se pinta violeta o gris según el estado. */
+.gallery-arrow {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.gallery-prev .gallery-arrow { transform: rotate(-90deg); }
+.gallery-next .gallery-arrow { transform: rotate(90deg); }
+
+/* --- Mensaje cuando el proyecto todavía no tiene imágenes --- */
+.gallery-empty {
+  /* El aviso no sangra hasta el borde como sí lo hacen las capturas */
+  margin-right: var(--space-5);
+  padding: 48px 24px;
+  border: 1px dashed var(--color-border-soft);
+  border-radius: var(--radius-media);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.gallery-empty code {
+  font-family: ui-monospace, monospace;
+  color: var(--color-ink);
+}
+
+/* --- Desktop: texto a la izquierda, carrusel a la derecha ---
+   El carrusel llega hasta el borde de la tarjeta y la captura
+   siguiente se corta contra el filo, como en el diseño.
+   La descripción sigue llenando todo el ancho de SU columna (sin
+   max-width): decisión de Cristian, no cambió. --- */
+@media (min-width: 1024px) {
+  .projects { gap: 88px; }
+
+  .project-card {
+    --pad-x: 4.4%;   /* margen interno de la tarjeta en desktop */
+
+    display: grid;
+    /* 28% de texto + 8% de aire + el resto para las capturas */
+    grid-template-columns: minmax(0, 28%) minmax(0, 1fr);
+    column-gap: 8%;
+    /* El bloque de texto queda centrado a la altura del carrusel */
+    align-items: center;
+    /* 52 = 40 de aire + 12 invisibles que sobran del botón de flecha */
+    padding: 64px 0 52px var(--pad-x);
+  }
+
+  /* En dos columnas el aire de la derecha lo da el hueco del grid */
+  .project-info { padding-right: 0; }
+
+  /* Deja asomar un poco menos de la captura siguiente que en celular */
+  .project-gallery { --slide-w: 92%; }
+}
+
+
+/* Desde desktop el titular corta exactamente donde corta en el Figma.
+   (Va después de .br-desktop{display:none} para que gane esta regla.) */
+@media (min-width: 1024px) {
+  .br-desktop { display: inline; }
+}
+
+
+/* ============================================================
+   VENTANA AMPLIADA (modal de las capturas)
+   ============================================================ */
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+
+  background-color: rgba(28, 26, 22, 0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.modal-fondo.is-open { opacity: 1; }
+
+/* La imagen y sus controles, apilados y centrados */
+.modal-caja {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: min(1400px, 94vw);
+}
+
+.modal-imagen {
+  max-width: 100%;
+  /* 78vh y no más: el resto del alto lo ocupan los controles de abajo */
+  max-height: 78vh;
+  width: auto;
+  border-radius: var(--radius-media);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+
+  transform: scale(0.97);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-fondo.is-open .modal-imagen { transform: scale(1); }
+
+/* --- Navegación dentro de la ventana ampliada ---
+   Mismos controles que el carrusel (flecha, contador, flecha), para
+   que se manejen igual adentro y afuera. --- */
+.modal-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.modal-contador {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  color: var(--color-white);   /* el fondo de la modal es oscuro */
+  min-width: 56px;
+  text-align: center;
+}
+
+/* 44x44 para que se puedan tocar en celular */
+.modal-btn,
+.modal-cerrar {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.modal-btn:hover:not(:disabled),
+.modal-cerrar:hover { transform: scale(1.08); }
+
+/* En la primera y en la última no hay a dónde ir */
+.modal-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.modal-arrow {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Es la misma flecha del carrusel, girada */
+.modal-prev .modal-arrow { transform: rotate(-90deg); }
+.modal-next .modal-arrow { transform: rotate(90deg); }
+
+.modal-cerrar {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-fondo,
+  .modal-imagen,
+  .modal-btn,
+  .modal-cerrar { transition: none; }
+  .modal-imagen { transform: none; }
+}
+
+
+/* ============================================================
+   SKILLS & TOOLS — dos columnas de etiquetas
+   ============================================================ */
+
+/* Mismo fondo oscuro y ancho completo que .herramientas (Tech stack):
+   franja aparte del degradado naranja de arriba. El contenido adentro
+   mantiene el ancho de lectura de siempre con .skills-contenido. */
+.skills {
+  width: 100%;
+  padding: 56px var(--space-5) 96px;
+  /* Glassmorphism: mismo tratamiento que ".recientes-grid"/".site-footer"
+     (traslúcido + blur) en vez de un fondo sólido. */
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.skills-contenido {
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+/* Mismo tratamiento que ".herramientas-titulo" (Tech stack): mayúsculas,
+   chico, gris, con tracking. Antes era un título normal; ahora hace
+   juego con esa otra franja oscura. */
+.skills-heading {
+  margin-bottom: 32px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Cuando las etiquetas SÍ entran completas (no hace falta el
+   carrusel), que se vean centradas en vez de pegadas a la izquierda. */
+.tag-marquee .tag-list {
+  justify-content: center;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  list-style: none;
+}
+
+/* --- Carrusel: fuerza una sola fila (nada de flex-wrap) y esconde
+   lo que se sale por los costados. El JS (.tag-marquee-activo) es el
+   que decide si hace falta duplicar las etiquetas y animarlas; sin
+   JS, esta fila simplemente se recorta o queda como una fila normal
+   si de casualidad entra completa. --- */
+.tag-marquee {
+  overflow: hidden;
+  width: 100%;
+  /* Para que el degradado de los bordes (de más abajo) no tape las
+     etiquetas al levantarse en hover. */
+  padding: 6px 0;
+}
+
+.tag-marquee .tag-list {
+  flex-wrap: nowrap;
+  width: max-content;
+}
+
+/* El desplazamiento automático y el arrastre manual los maneja el JS
+   ("CARRUSEL DE ETIQUETAS" en js/main.js) escribiendo directamente
+   .tag-list.style.transform en cada cuadro: nada de @keyframes acá,
+   así los dos modos (solo/a mano) usan el mismo número sin pelearse. */
+.tag-marquee-activo .tag-list {
+  cursor: grab;
+  /* Evita que el navegador interprete el arrastre horizontal como
+     "seleccionar texto" o como gesto de navegación táctil; el scroll
+     vertical de la página sigue funcionando normal. */
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.tag-marquee-activo.arrastrando .tag-list {
+  cursor: grabbing;
+}
+
+/* Se ve mejor si no aparece/desaparece de golpe en los bordes: un
+   velo del color de fondo, apenas unos px, a cada lado. */
+.tag-marquee-activo {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tag-marquee { overflow-x: auto; }
+}
+
+.tag-list li {
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  /* Borde hacia adentro, para no sumarle alto a la etiqueta */
+  box-shadow: inset 0 0 0 1px var(--color-border-soft);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--color-ink);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+/* Se levanta un poco y se marca en violeta: invita a pasar el mouse
+   por toda la fila, en vez de leerla como texto quieto */
+.tag-list li:hover {
+  transform: translateY(-3px);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+}
+
+.tag-list-tools li:hover .tool-logo { transform: scale(1.12); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tag-list li { transition: none; }
+  .tag-list li:hover { transform: none; }
+}
+
+/* ============================================================
+   PROGRAMAS — franja oscura de ancho completo (como el Hello y el
+   footer: siempre oscura, no cambia con nada).
+   ============================================================ */
+
+.herramientas {
+  width: 100%;
+  padding: 48px var(--space-5);
+  /* Glassmorphism: mismo tratamiento que ".recientes-grid"/".skills"
+     (traslúcido + blur) en vez de un fondo sólido. */
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 768px) {
+  .herramientas { padding: 56px var(--space-25); }
+}
+
+.herramientas-titulo {
+  margin-bottom: 40px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.herramientas-lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 32px 56px;
+  list-style: none;
+}
+
+.herramientas-lista li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  /* Chico: el logo es la protagonista, el nombre es solo el respaldo
+     por si el logo no se reconoce a simple vista. */
+  font-size: 0.75rem;
+  color: var(--color-hero-texto);
+}
+
+/* Grande: acá el logo es lo principal (antes de que cargue, o si no
+   existe el archivo, el nombre de arriba ocupa este mismo lugar). */
+.tool-logo {
+  height: 56px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.herramientas-lista li:hover .tool-logo { transform: scale(1.12); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-logo { transition: none; }
+}
+
+
+/* ============================================================
+   PROYECTOS RECIENTES — grilla de 6 con líneas finas, como una
+   tabla (mismo lenguaje que la referencia de Cristian).
+   ============================================================ */
+
+/* A propósito SIN max-width acá: el carrusel de más abajo tiene que
+   poder llegar a los dos bordes de la pantalla. El título, que sí
+   necesita quedar centrado y legible, tiene el suyo propio. */
+.recientes {
+  width: 100%;
+  padding: 96px 0;
+}
+
+.recientes-titulo {
+  max-width: var(--content-width);
+  margin: 0 auto 40px;
+  padding: 0 var(--space-5);
+  text-align: center;
+  font-family: var(--font-black);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  color: var(--color-ink);
+}
+
+/* Carrusel a todo el ancho de la pantalla: se arrastra con el
+   mouse/dedo (ver "CARRUSEL DE PROYECTOS RECIENTES" en js/main.js) y
+   también responde al scroll horizontal normal. El primer y el
+   último ítem quedan a var(--space-5) del borde, igual que el resto
+   del sitio; entre medio, se estira todo lo que da la pantalla. */
+/* "Ventana" del carrusel: recorta lo que no entra. El movimiento (solo
+   o arrastrado) lo hace el JS escribiendo transform en .recientes-pista
+   directamente, cuadro a cuadro — NADA de scrollLeft/scroll nativo,
+   que resultó poco confiable para animar a mano (ver "CARRUSEL DE
+   PROYECTOS RECIENTES" en js/main.js). */
+.recientes-carrusel {
+  overflow: hidden;
+  width: 100%;
+  padding: 8px var(--space-5) 16px;
+  cursor: grab;
+}
+
+.recientes-carrusel.arrastrando { cursor: grabbing; }
+
+.recientes-pista {
+  display: flex;
+  gap: 28px;
+  width: max-content;
+}
+
+.recientes-item {
+  flex: 0 0 auto;
+  width: clamp(200px, 26vw, 300px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* El drag empieza en el contenedor: que la imagen no se arrastre
+     sola como si fuera a "soltarse" de la página. */
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.recientes-item img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  object-fit: cover;
+  filter: grayscale(0.4) brightness(0.9);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+  transition: filter 0.25s ease, transform 0.25s ease;
+}
+
+.recientes-item:hover img {
+  filter: grayscale(0) brightness(1);
+  transform: translateY(-6px);
+}
+
+.recientes-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.recientes-nombre {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: 1rem;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recientes-categoria {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recientes-item img { transition: none; }
+}
+
+
+
+/* ============================================================
+   SECCIONES (placeholders — se maquetan en los próximos pasos)
+   ============================================================ */
+
+/* ============================================================
+   ABOUT ME — foto con ficha + tarjeta de texto
+   ============================================================ */
+
+.about {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 var(--space-5) 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Dos columnas desde tablet: la foto no crece, la tarjeta sí */
+@media (min-width: 600px) {
+  .about {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 6%;
+  }
+
+  .about-foto { flex: 0 0 30%; }
+  .about-tarjeta { flex: 1 1 0; min-width: 0; }
+}
+
+/* --- La foto ---
+   La silueta: tres esquinas al 50%, que sobre una caja cuadrada dan
+   media circunferencia, y solo la de abajo a la derecha con el radio
+   normal de las imágenes del sitio.
+
+   El orden del border-radius es: arriba-izq, arriba-der, abajo-der,
+   abajo-izq (a favor de las agujas del reloj, empezando arriba a la
+   izquierda). --- */
+.about-foto {
+  position: relative;   /* referencia para la ficha del nombre */
+  align-self: center;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50% 50% var(--radius-media) 50%;
+
+  /* Se ve mientras no haya foto: en vez de una imagen rota, queda la
+     silueta del arco en gris suave. */
+  background-color: var(--color-border-soft);
+}
+
+.about-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;    /* llena el arco sin deformar */
+  object-position: center;
+  border-radius: inherit;
+}
+
+/* --- La ficha con el nombre, encima de la foto --- */
+.about-ficha {
+  position: absolute;
+  left: 8px;
+  /* Asoma por debajo del borde de la foto, como en el diseño */
+  bottom: -18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 18px;
+  border-radius: var(--radius-media);
+  background-color: var(--color-surface);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+}
+
+.about-ficha-nombre {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-base);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+}
+
+.about-ficha-lugar {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+/* --- La tarjeta de texto --- */
+.about-tarjeta {
+  padding: clamp(24px, 3vw, 40px);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+}
+
+.about-titulo {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);   /* 18 → 22px */
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-accent);
+}
+
+.about-etiqueta {
+  margin-top: 10px;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+
+/* Mismos valores que la descripción de los proyectos (.project-desc):
+   interlineado 130% y color #696969. Son los que definió Cristian para
+   los textos largos del sitio; no cambiarlos por separado. */
+/* --- Botón secundario: descargar el CV ---
+   Misma geometría que .btn-primary del hero (alto, radio, tipografía)
+   para que se lean como una familia, pero sin relleno: es una acción
+   opcional, no la principal de la página. --- */
+.btn-secundario {
+  margin-top: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  /* 11 + 11 + 20 de línea + 2 del borde = 44px, el mismo alto que el
+     botón principal del hero y que el de enviar. El borde suma, por eso
+     el padding es 11 y no 12. */
+  padding: 11px var(--space-5);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-item);
+  background-color: transparent;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  line-height: 20px;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Glassmorphism al pasar el mouse (ver ".boton-espacio:hover"): el
+   naranja de marca queda solo para "Conectemos" (.nav-cta). */
+.btn-secundario:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+}
+
+.btn-secundario-icono { flex-shrink: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-secundario { transition: none; }
+}
+
+.about-texto {
+  margin-top: 20px;
+  font-family: var(--font-body);
+  font-size: var(--text-project-desc);
+  line-height: 1.3;
+  color: var(--color-muted);
+}
+
+
+/* ============================================================
+   FOOTER — tres columnas sobre fondo oscuro
+   ============================================================ */
+
+.site-footer {
+  /* Mismo "vidrio esmerilado" que la grilla de Proyectos recientes:
+     translúcido + blur de lo que hay detrás (el cielo estrellado). */
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  /* Solo las esquinas de arriba: abajo cierra a ras de la pantalla */
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+.footer-interior {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 48px var(--space-5) 64px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+}
+
+/* Desde desktop, las tres columnas: la de Links ocupa el triple */
+@media (min-width: 1024px) {
+  .footer-interior {
+    padding: 56px var(--space-10) 80px;
+    grid-template-columns: 3fr 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+.footer-titulo {
+  margin-bottom: 20px;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-bold);
+  font-size: 0.875rem;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-footer-title);
+}
+
+.footer-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.footer-lista a {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: var(--color-footer-link);
+  transition: color 0.2s ease;
+}
+
+.footer-lista a:hover { color: var(--color-white); }
+
+/* --- El enlace con ícono de la columna Links --- */
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.footer-social span { text-decoration: underline; }
+
+.footer-icono {
+  flex-shrink: 0;
+  /* Toma el color del enlace, así cambia solo al pasar el mouse */
+  color: inherit;
+}
+
+
+/* ============================================================
+   LÍNEA SEPARADORA ENTRE SECCIONES
+
+   Va de borde a borde de la pantalla, sin respetar el margen del
+   contenido: es una raya que corta la página en dos.
+
+   El aire de ARRIBA ya lo da el padding de abajo de la sección
+   anterior; el de ABAJO lo pone este margen, porque las secciones no
+   tienen padding arriba.
+   ============================================================ */
+
+.separador {
+  border: none;
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 0 0 clamp(48px, 6vw, 72px);
+}
+
+
+/* ============================================================
+   GET IN TOUCH — titular + formulario de contacto
+   ============================================================ */
+
+.contacto {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 64px var(--space-5) 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Desde tablet: texto a la izquierda, formulario a la derecha */
+@media (min-width: 768px) {
+  .contacto {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 64px;
+  }
+
+  .contacto-texto { flex: 1 1 0; }
+  .contacto .contacto-form { flex: 1 1 0; margin-top: 0; }
+}
+
+.contacto-titulo {
+  text-wrap: balance;   /* reparte las líneas parejas */
+  font-family: var(--font-black);
+  font-weight: var(--weight-regular);
+  /* Misma escala que el titular del hero: es el cierre de la página y
+     tiene que pesar parecido a la apertura. */
+  font-size: clamp(2rem, 3.34vw, 3rem);   /* 32 → 48px */
+  line-height: 1.15;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+}
+
+.contacto-titulo .is-accent { color: var(--color-accent); }
+
+.contacto-lead {
+  margin-top: 16px;
+  font-family: var(--font-body);
+  font-size: var(--text-lead);
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+/* --- El formulario --- */
+.contacto-form {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+/* La trampa antispam no se ve nunca */
+.campo-trampa { display: none; }
+
+/* Nombre y email comparten fila desde tablet */
+.contacto-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 600px) {
+  .contacto-fila { flex-direction: row; }
+  .contacto-fila .campo { flex: 1 1 0; min-width: 0; }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campo label {
+  font-family: var(--font-ui);
+  font-weight: var(--weight-semibold);
+  font-size: 0.875rem;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+}
+
+.campo input[type="text"],
+.campo input[type="email"],
+.campo textarea {
+  width: 100%;
+  /* 14 + 14 + 20 de línea = 48px de alto: por encima del mínimo táctil */
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-field);
+  background-color: var(--color-surface);
+  font-family: var(--font-body);
+  font-size: var(--text-project-desc);
+  line-height: 20px;
+  color: var(--color-ink);
+  transition: border-color 0.2s ease;
+}
+
+.campo input:focus,
+.campo textarea:focus {
+  border-color: var(--color-accent);
+}
+
+.campo textarea {
+  min-height: 140px;
+  resize: vertical;   /* que no se pueda deformar a lo ancho */
+}
+
+
+/* --- El botón de enviar ---
+   Reusa .btn-primary del hero, pero sin su margen gigante (allá
+   separa el botón del titular; acá va pegado al formulario). --- */
+.contacto-enviar {
+  margin-top: 8px;
+  align-self: flex-start;
+  cursor: pointer;
+
+  /* Mismo estilo "outline" que el botón "Let's connect" del header
+     (.nav-cta): borde fino, fondo transparente, se rellena de acento
+     al pasar el mouse. */
+  border: 1px solid var(--color-ink);
+  background-color: transparent;
+  color: var(--color-ink);
+  box-shadow: none;
+}
+
+.contacto-enviar:hover {
+  /* Pisa el translateY/brightness de .btn-primary. Glassmorphism en
+     vez de rellenarse de naranja (ver ".boton-espacio:hover"): el
+     naranja de marca queda solo para "Conectemos" (.nav-cta). */
+  transform: none;
+  filter: none;
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-nav));
+  -webkit-backdrop-filter: blur(var(--blur-nav));
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* La flecha del botón apunta a la derecha, no hacia abajo */
+.contacto-enviar .btn-icon img { transform: rotate(90deg); }

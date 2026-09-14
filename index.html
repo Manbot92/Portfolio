@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en" data-idioma="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Cristian Vélez — Product UX/UI Designer</title>
+  <meta name="description" content="Portfolio de Cristian Vélez, Product UX/UI Designer. Diseño de interfaces digitales, sistemas de diseño y experiencias centradas en el usuario.">
+
+  <!-- Google Analytics: mide visitas y métricas del sitio -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VSRY9CKKLL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VSRY9CKKLL');
+  </script>
+
+  <!-- Tipografías del Figma: Alexandria y Archivo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;700&family=Archivo:wght@400;600;700&family=Archivo+Black&family=Asta+Sans:wght@400&display=swap" rel="stylesheet">
+
+  <!-- Se ejecuta ANTES de que se pinte la página, para que no haya
+       parpadeo. Hace dos cosas:
+
+       1. Marca que hay JavaScript. Los elementos animados solo se
+          ocultan si existe esta clase, así que si el JS falla o está
+          desactivado, todo se ve igual pero sin animación.
+
+       2. Elige el idioma: el que hayas usado la última vez, o el del
+          navegador si es tu primera visita. Sin JavaScript queda el
+          inglés, que es lo que trae el HTML.
+
+       (El sitio es solo modo oscuro: ya no hay selector de tema.) -->
+  <script>
+    document.documentElement.classList.add('js-anim');
+    (function () {
+      var guardado = null;
+      try { guardado = localStorage.getItem('idioma'); } catch (e) {}
+      var idioma = (guardado === 'es' || guardado === 'en') ? guardado
+        : ((navigator.language || 'en').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+      document.documentElement.setAttribute('data-idioma', idioma);
+      document.documentElement.setAttribute('lang', idioma);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/tokens.css?v=6">
+  <link rel="stylesheet" href="css/styles.css?v=86">
+  <!-- Estilos del modal de proyecto (mismo modal que ux-ui.html) -->
+  <link rel="stylesheet" href="css/proyectos-bento.css?v=4">
+</head>
+<body>
+
+  <!-- Fondo animado: cielo estrellado con profundidad (algunas más
+       nítidas, otras tenues) que se desplaza al hacer scroll, con
+       algún cometa cruzando cada tanto. Puramente decorativo, va
+       detrás de todo el contenido. Lo dibuja el JS (ver "FONDO
+       ANIMADO — CIELO ESTRELLADO" en js/main.js). -->
+  <canvas id="fondo-red" class="fondo-red" aria-hidden="true"></canvas>
+
+  <!-- Barra fina que crece con el scroll: marca cuánto falta de página.
+       La ancha el JS (ver "BARRA DE PROGRESO" en js/main.js). -->
+  <div class="progreso" aria-hidden="true"><div class="progreso-barra"></div></div>
+
+  <!-- Botón flotante: esconde toda la página y deja solo el fondo
+       animado (estrellas + cometas) a pantalla completa. Ver "BOTÓN
+       VER LAS ESTRELLAS" en js/main.js y ".modo-espacio" en el CSS. -->
+  <button type="button" id="boton-espacio" class="boton-espacio" aria-pressed="false">
+    <span data-estado="ver"><span lang="en">View the stars</span><span lang="es">Ver las estrellas</span></span>
+    <span data-estado="volver" hidden><span lang="en">Back to the site</span><span lang="es">Volver al sitio</span></span>
+  </button>
+
+  <!-- ============================================================
+       HEADER — barra de navegación
+
+       CÓMO FUNCIONAN LOS DOS IDIOMAS EN TODO EL SITIO:
+       cada texto está escrito dos veces, una al lado de la otra:
+
+           <span lang="en">Projects</span><span lang="es">Proyectos</span>
+
+       El CSS muestra solo la del idioma elegido. Para cambiar un texto,
+       editá las dos versiones y listo: no hay que tocar ningún otro
+       archivo. Si un texto no se traduce (nombres de proyectos, de
+       herramientas, tu nombre), va suelto sin spans.
+       ============================================================ -->
+  <header class="site-header header-hero">
+
+    <!-- Solo se ve en celular. En pantallas más grandes los links van
+         siempre a la vista y este botón se esconde. -->
+    <button class="nav-toggle" type="button"
+            aria-expanded="false" aria-controls="menu-principal"
+            aria-label="Abrir menú">
+      <span class="nav-toggle-linea"></span>
+      <span class="nav-toggle-linea"></span>
+      <span class="nav-toggle-linea"></span>
+    </button>
+
+    <!-- Nombre, a la izquierda. En esta página (el home) es solo un
+         ancla a "Hello!"; en el resto de páginas apunta acá mismo
+         (index.html#hello). -->
+    <a href="#hello" class="brand-nombre">Cristian Vélez</a>
+
+    <!-- Selector de idioma, al lado del nombre. -->
+    <div class="idioma-toggle" role="group" aria-label="Language / Idioma">
+      <button type="button" class="idioma-boton" data-idioma-set="en">EN</button>
+      <button type="button" class="idioma-boton" data-idioma-set="es">ES</button>
+    </div>
+
+    <!-- Cada categoría (UX/UI, Branding, 3D) es una PÁGINA aparte, no
+         una sección de esta misma página. Ya no se marca cuál está
+         activa (is-active): los cuatro links se ven siempre igual. -->
+    <nav class="nav-pill" id="menu-principal" aria-label="Navegación principal">
+      <a href="#hello" class="nav-item"><span lang="en">Hello!</span><span lang="es">¡Hola!</span></a>
+      <a href="ux-ui.html" class="nav-item">UX/UI</a>
+      <a href="branding.html" class="nav-item"><span lang="en">Branding &amp; Visual</span><span lang="es">Branding &amp; Visual</span></a>
+      <a href="3d-modeling.html" class="nav-item">3D</a>
+
+      <!-- Mismo botón que el de acá abajo (en .brand), repetido. Es la
+           versión que se ve SOLO en celular, dentro del menú
+           hamburguesa: en .brand queda oculta en celular, y esta queda
+           oculta en tablet/desktop (ver el media query "hasta 599px"
+           en styles.css). Así en cada tamaño existe un solo botón
+           visible, nunca los dos a la vez. -->
+      <a href="#get-in-touch" class="nav-item nav-cta">
+        <span lang="en">Let&rsquo;s connect</span><span lang="es">Conectemos</span>
+        <span class="nav-cta-icono"><img src="assets/img/icon-arrow.svg" alt="" width="14" height="14"></span>
+      </a>
+    </nav>
+
+    <div class="brand">
+
+      <!-- El botón "de verdad" para tablet/desktop. En celular se
+           esconde: su lugar lo ocupa la copia de arriba, dentro del
+           menú hamburguesa. -->
+      <a href="#get-in-touch" class="nav-item nav-cta">
+        <span lang="en">Let&rsquo;s connect</span><span lang="es">Conectemos</span>
+        <span class="nav-cta-icono"><img src="assets/img/icon-arrow.svg" alt="" width="14" height="14"></span>
+      </a>
+
+    </div>
+
+  </header>
+
+
+  <main>
+
+    <!-- ============================================================
+         HELLO! — sección de presentación (hero)
+         Para cambiar los textos, edítalos directamente acá abajo.
+         ============================================================ -->
+    <section id="hello" class="hero" data-reveal-group>
+
+      <!-- Foto de fondo + degradado naranja encima, para que se lea
+           como una sola pieza y el texto de arriba se pueda leer.
+           Para cambiar el video, reemplazá assets/perfil/hero-video.mp4
+           manteniendo el nombre. autoplay+muted+loop+playsinline para
+           que arranque solo (sin sonido) en cualquier navegador,
+           incluido el celular. -->
+      <div class="hero-fondo" aria-hidden="true">
+        <video src="assets/perfil/hero-video.mp4" autoplay muted loop playsinline></video>
+      </div>
+
+      <div class="hero-texto">
+        <p class="hero-eyebrow" data-reveal>
+          <span lang="en">Hello, I&rsquo;m <span class="is-accent">Cristian</span></span>
+          <span lang="es">Hola, soy <span class="is-accent">Cristian</span></span>
+        </p>
+
+        <div class="hero-quote">
+
+          <!-- La palabra dentro de .hero-palabra-rotativa cambia sola
+               cada 3 segundos (UX/UI → Visual → 3D → UX/UI...), ver
+               "TÍTULO ROTATIVO DEL HERO" en js/main.js. Es la MISMA
+               palabra en los dos idiomas (no se traduce "UX/UI",
+               "Visual" ni "3D"), así que el JS actualiza las dos
+               copias (inglés y español) al mismo tiempo sin
+               importarle cuál está visible. -->
+          <h1 class="hero-headline" data-reveal>
+            <span lang="en"><span class="hero-palabra-rotativa">UX/UI</span> Designer</span>
+            <span lang="es">Diseñador <span class="hero-palabra-rotativa">UX/UI</span></span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Categorías reales del sitio (las mismas 3 páginas del menú),
+           a modo de remate de la tarjeta. Si agregás una categoría
+           nueva al menú, copiá uno de estos <a> y sumalo acá también. -->
+      <nav class="hero-categorias" aria-label="Categorías de trabajo" data-reveal>
+        <a href="ux-ui.html">
+          <span class="hero-categoria-titulo"><span class="hero-categoria-num">01</span>UX/UI</span>
+          <span class="hero-categoria-desc">
+            <span lang="en">I design digital interfaces that are easy to use, useful and look great.</span>
+            <span lang="es">Creo interfaces digitales fáciles de usar, útiles y que se ven geniales.</span>
+          </span>
+        </a>
+        <a href="branding.html">
+          <span class="hero-categoria-titulo"><span class="hero-categoria-num">02</span><span lang="en">Branding and visual design</span><span lang="es">Branding and visual design</span></span>
+          <span class="hero-categoria-desc">
+            <span lang="en">I give brands personality and create their pieces, digital or for print.</span>
+            <span lang="es">Le doy personalidad a las marcas y creo sus piezas digitales o para impresión.</span>
+          </span>
+        </a>
+        <a href="3d-modeling.html">
+          <span class="hero-categoria-titulo"><span class="hero-categoria-num">03</span><span lang="en">3D Modeling</span><span lang="es">Modelado 3D</span></span>
+          <span class="hero-categoria-desc">
+            <span lang="en">I model 3D objects and spaces, and render them into realistic images.</span>
+            <span lang="es">Modelo objetos y espacios en 3D, y los renderizo en imágenes realistas.</span>
+          </span>
+        </a>
+      </nav>
+
+      <!-- El botón reutiliza el mismo PDF que "About me": ver el
+           aviso sobre el CV en español ahí abajo. -->
+      <a class="btn-secundario hero-cv cv-descarga" data-reveal
+         href="assets/cv/cv-cristian-velez-en.pdf" download>
+        <svg class="btn-secundario-icono" viewBox="0 0 24 24" width="18" height="18"
+             fill="none" aria-hidden="true" focusable="false">
+          <path d="M12 3v11m0 0l-4.5-4.5M12 14l4.5-4.5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+                stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span lang="en">Resume</span><span lang="es">Currículum</span>
+      </a>
+
+    </section>
+
+    <!-- ============================================================
+         PROGRAMAS — franja oscura de ancho completo, justo después
+         de la foto del Hello.
+
+         Los logos se cargan solos si existe el archivo correspondiente
+         en assets/tools/ (ver "LOGOS DE HERRAMIENTAS" en js/main.js).
+         Mientras no exista, cada uno muestra el nombre en texto.
+         ============================================================ -->
+    <section class="herramientas" data-reveal-group>
+      <p class="herramientas-titulo" data-reveal>
+        <span lang="en">Tech stack</span>
+        <span lang="es">Stack tecnológico</span>
+      </p>
+      <ul class="herramientas-lista">
+        <li data-reveal data-tool="figma">Figma</li>
+        <li data-reveal data-tool="claude">Claude</li>
+        <li data-reveal data-tool="perplexity">Perplexity</li>
+        <li data-reveal data-tool="notion">Notion</li>
+        <li data-reveal data-tool="maze">Maze</li>
+        <li data-reveal data-tool="photoshop">Photoshop</li>
+        <li data-reveal data-tool="illustrator">Illustrator</li>
+        <li data-reveal data-tool="lightroom">Lightroom</li>
+        <li data-reveal data-tool="3dmax">3ds Max</li>
+        <li data-reveal data-tool="vray">V-Ray</li>
+      </ul>
+    </section>
+
+    <!-- Línea separadora. Va de borde a borde de la pantalla.
+         Para cambiar el aire que deja, mirá .separador en el CSS. -->
+    <hr class="separador">
+
+    <!-- ============================================================
+         PROYECTOS RECIENTES — vidriera de 6, con link a la página de
+         su categoría. Por ahora los 6 son de UX/UI porque es la única
+         categoría con proyectos reales cargados: apenas tengas
+         contenido real de Branding o 3D, cambiamos 2 o 3 de estos por
+         esos (nunca inventar proyectos que no existen).
+
+         La PORTADA de cada uno reutiliza la primera captura de su
+         carrusel (ver js/projects.js). Cuando tengas una imagen
+         pensada como portada, avisame y la cambiamos acá.
+         ============================================================ -->
+    <section class="recientes" data-reveal-group>
+      <h2 class="recientes-titulo" data-reveal>
+        <span lang="en">Recent Projects</span>
+        <span lang="es">Proyectos recientes</span>
+      </h2>
+
+      <!-- Carrusel a todo el ancho de la pantalla (a propósito, sin el
+           max-width del resto de la sección): se arrastra con el
+           mouse/dedo (ver "CARRUSEL DE PROYECTOS RECIENTES" en
+           js/main.js) y también responde al scroll horizontal normal
+           (trackpad, shift+rueda). -->
+      <div class="recientes-carrusel" data-carrusel>
+       <div class="recientes-pista">
+        <!-- data-proyecto + los campos ocultos (bento-item-*) son lo que
+             lee js/proyectos-bento.js para abrir el modal con la info
+             real del proyecto (la misma que en ux-ui.html). El href
+             queda como respaldo por si el JS no carga. -->
+        <a class="recientes-item" href="ux-ui.html" data-reveal data-proyecto="doqmind-platform">
+          <img src="assets/projects/doqmind-platform/01-projects.png" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">DOQMIND</span>
+            <span class="recientes-categoria">UX/UI</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>DOQMIND</h2>
+          <span class="bento-item-categoria" hidden>SaaS</span>
+          <span class="bento-badge-anio" hidden><span lang="en">2023–Present</span><span lang="es">2023–Presente</span></span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Workflow and assets management platform</span>
+            <span lang="es">Plataforma de gestión de flujos de trabajo y activos</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">I stepped into this project with the platform already live to fix critical issues:
+              poorly optimized workflows causing bottlenecks and inconsistent interfaces that felt tedious to
+              users. I redesigned dozens of screens and built a structured design system with a clear, versatile
+              visual identity tailored for client customization. Ultimately, we optimized user task times and
+              provided a much simpler way to search for files and manage projects.</span>
+            <span lang="es">Entré a este proyecto con la plataforma ya en marcha para resolver problemas
+              críticos: flujos mal optimizados que generaban cuellos de botella e interfaces sin consistencia
+              visual que resultaban tediosas para el usuario. Rediseñé decenas de pantallas y estructuré un
+              sistema de diseño con una identidad visual clara y versátil para la personalización de cada
+              cliente. Al final, logramos optimizar los tiempos de trabajo de los usuarios y les dimos una
+              forma mucho más sencilla de buscar archivos y gestionar sus proyectos.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="ux-ui.html" data-reveal data-proyecto="omega-security">
+          <img src="assets/projects/omega-security/01-menu-navegacion.jpg" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">Omega Security</span>
+            <span class="recientes-categoria">UX/UI</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>Omega Security</h2>
+          <span class="bento-item-categoria" hidden>B2B</span>
+          <span class="bento-badge-anio" hidden>2022</span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Residential unit access management platform</span>
+            <span lang="es">Plataforma de gestión de accesos para unidades residenciales</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">I designed from scratch the platform used by security guards
+              and coordinators in residential complexes to manage access logs, parcel
+              deliveries, and incident reports. To understand the real-world context,
+              I conducted field research directly at guard posts, interviewing staff
+              to map out time-critical actions. Based on these insights, I structured an
+              intuitive layout with role-based access that streamlined the daily operations
+              of the security team. The platform is currently live and actively running
+              across the company's residential sites.</span>
+            <span lang="es">Diseñé desde cero la plataforma que utilizan los vigilantes y
+              coordinadores en unidades residenciales para gestionar accesos, paquetería y
+              minutas de seguridad. Para entender las necesidades reales del entorno,
+              realicé investigación de campo directamente en las porterías, entrevistando
+              al personal operativo para mapear las tareas más críticas e inmediatas. Con
+              esta información, definí un layout intuitivo y un sistema de permisos por
+              roles que simplificó la rutina diaria del equipo de seguridad. La plataforma
+              se encuentra completamente funcional, operando en tiempo real en los
+              proyectos residenciales de la empresa.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="ux-ui.html" data-reveal data-proyecto="ciat-cgiar-foresight">
+          <img src="assets/projects/ciat-cgiar-foresight/01-home.jpg" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">CIAT &amp; CGIAR foresight</span>
+            <span class="recientes-categoria">UX/UI</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>CIAT &amp; CGIAR foresight</h2>
+          <span class="bento-item-categoria" hidden>Dashboards</span>
+          <span class="bento-badge-anio" hidden>2021</span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Website and interactive dashboard</span>
+            <span lang="es">Sitio web y tablero interactivo</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">I designed an interactive dashboard for CIAT and CGIAR
+              Foresight focused on visualizing open-data across socio-economic and food
+              systems. My role was to structure and categorize complex variables
+              (environmental, social, energy, and consumer choice) into a clear overview
+              of country-level performance in regions like Ethiopia, Honduras, and
+              Bangladesh. The tool is currently active and supports the organization’s
+              ongoing foresight research.</span>
+            <span lang="es">Diseñé un dashboard interactivo para CIAT y CGIAR Foresight
+              enfocado en la visualización de datos abiertos sobre sistemas alimentarios y
+              socioeconómicos. Mi rol fue estructurar y categorizar variables complejas
+              (ambientales, sociales, energéticas y de consumo) para presentar una visión
+              clara de la situación país en regiones como Etiopía, Honduras y Bangladesh. La herramienta está
+              operativa y permite a la organización analizar la salud general de estas
+              variables para respaldar sus investigaciones prospectivas.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="ux-ui.html" data-reveal data-proyecto="doqmind-viewer">
+          <img src="assets/projects/doqmind-viewer/01-general.jpg" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">DOQMIND</span>
+            <span class="recientes-categoria">UX/UI</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>DOQMIND</h2>
+          <span class="bento-item-categoria" hidden>SaaS</span>
+          <span class="bento-badge-anio" hidden><span lang="en">2023–Present</span><span lang="es">2023–Presente</span></span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Collaborative asset viewer</span>
+            <span lang="es">Visor colaborativo de assets</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">I designed this interface from scratch based on an initial set of technical
+              requirements and collaborative tools. I mapped out interaction flows and structured a
+              workspace where complex features—such as distance measuring, color layer inspection,
+              barcode analysis, multi-page viewing, and live commenting—could coexist seamlessly.
+              The tool is currently live, used in real-time operations, and continuously evolving.</span>
+            <span lang="es">Diseñé esta interfaz desde cero a partir de una lista inicial de
+              requerimientos técnicos y herramientas colaborativas. Me encargué de diagramar
+              las interacciones y estructurar un espacio de trabajo donde funciones complejas
+              como medición de distancias, inspección de capas de color, códigos de barras,
+              paginado y comentarios en tiempo real convivieran de manera intuitiva y sin choques
+              operativos. La herramienta está completamente funcional, es utilizada en tiempo real
+              por los clientes de la compañía y continúa sumando mejoras.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="ux-ui.html" data-reveal data-proyecto="le-grand-frances-bakery">
+          <img src="assets/projects/le-grand-frances-bakery/01-home.jpg" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">Le grand francés bakery</span>
+            <span class="recientes-categoria">UX/UI</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>Le grand francés bakery</h2>
+          <span class="bento-item-categoria" hidden>B2C</span>
+          <span class="bento-badge-anio" hidden>2020</span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Online sales platform</span>
+            <span lang="es">Plataforma de ventas online</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">I designed the e-commerce platform for Le Grand Francés,
+              covering everything from brand presentation to catalog management and the
+              full checkout/delivery flow for both retail and wholesale orders. The live
+              platform optimized business operations by centralizing order intake,
+              logistics, and payments into a single, intuitive channel.</span>
+            <span lang="es">Diseñé la plataforma de e-commerce para la panadería Le
+              Grand Francés, cubriendo desde la presentación de marca hasta el catálogo y
+              flujo completo de pago y envío para ventas minoristas y al por mayor. El
+              sitio web optimizó la operación del negocio al centralizar la recepción de
+              pedidos, organizando la logística y la facturación a través de un canal
+              digital claro y 100% operativo.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="ux-ui.html" data-reveal data-proyecto="driven-properties-latam">
+          <img src="assets/projects/driven-properties-latam/01-destacados.jpg" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">Driven properties LATAM</span>
+            <span class="recientes-categoria">UX/UI</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>Driven properties LATAM</h2>
+          <span class="bento-item-categoria" hidden><span lang="en">Websites</span><span lang="es">Sitios web</span></span>
+          <span class="bento-badge-anio" hidden>2020</span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Website</span>
+            <span lang="es">Sitio web</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">I designed the regional digital platform for Driven Properties
+              LATAM, tailored for real estate investment and discovery in Dubai. I
+              structured the user experience to highlight market benefits, map out key
+              neighborhoods, and present an interactive catalog for buying, selling, or
+              listing properties for rent.</span>
+            <span lang="es">Diseñé la plataforma digital de Driven Properties para el
+              mercado latinoamericano, orientada a la consulta e inversión inmobiliaria
+              en Dubái. Estructuré la experiencia para educar al usuario sobre
+              los beneficios del mercado, presentar un mapa de zonas clave y desplegar
+              un catálogo interactivo de propiedades para compra, venta o alquiler,
+              además de permitir a los propietarios postular sus inmuebles.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="branding.html" data-reveal data-proyecto="johanna-borrero-pediatria">
+          <img src="assets/projects/johanna-borrero-pediatria/00.jpg" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">Johanna Borrero Pediatría</span>
+            <span class="recientes-categoria">Branding</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>Johanna Borrero Pediatría y Neonatología</h2>
+          <span class="bento-item-categoria" hidden>Branding</span>
+          <span class="bento-badge-anio" hidden><span lang="en">2026</span><span lang="es">2026</span></span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Visual identity for a pediatric practice</span>
+            <span lang="es">Identidad visual para un consultorio pediátrico</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">Creation of the visual identity for Dra. Johanna Borrero's pediatric and
+              neonatal practice. I designed the isotype — a mother elephant and her calf, symbolizing
+              memory, protection and bond — along with the logotype, color palette, typography and
+              voice and tone.</span>
+            <span lang="es">Creación de la identidad visual para el consultorio de pediatría y
+              neonatología de la Dra. Johanna Borrero. Diseñé el isotipo —una elefanta y su cría, que
+              simbolizan memoria, protección y vínculo— junto con el logotipo, la paleta de color, la
+              tipografía y el tono de voz de la marca.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="branding.html" data-reveal data-proyecto="eme-al-cubo">
+          <img src="assets/projects/eme-al-cubo/00.jpg" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">Eme al Cubo</span>
+            <span class="recientes-categoria">Branding</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>Eme al Cubo</h2>
+          <span class="bento-item-categoria" hidden>Branding</span>
+          <span class="bento-badge-anio" hidden><span lang="en">2026</span><span lang="es">2026</span></span>
+          <p class="bento-item-subtitulo" hidden>
+            <span lang="en">Corporate identity for a construction company</span>
+            <span lang="es">Identidad corporativa para una constructora</span>
+          </p>
+          <p class="bento-item-desc-completa" hidden>
+            <span lang="en">Creation of the corporate identity for Eme al Cubo, an architectural
+              development and civil works company. I designed the isotype — the letter M repeated
+              on the three visible faces of a cube, drawn with a single continuous stroke — along
+              with the logotype, color palette, typography and system of authorized versions.</span>
+            <span lang="es">Creación de la identidad corporativa de Eme al Cubo, una empresa de
+              desarrollos arquitectónicos y obra civil. Diseñé el isotipo —la letra M repetida en
+              las tres caras visibles de un cubo, trazada con una sola línea continua— junto con el
+              logotipo, la paleta de color, la tipografía y el sistema de versiones autorizadas.</span>
+          </p>
+        </a>
+
+        <a class="recientes-item" href="3d-modeling.html" data-reveal data-proyecto="bigjonan-studio">
+          <img src="assets/projects/booth-design/aht-fehgra.png" alt="" loading="lazy" draggable="false">
+          <span class="recientes-texto">
+            <span class="recientes-nombre">Bigjonan Studio</span>
+            <span class="recientes-categoria">3D</span>
+          </span>
+          <h2 class="bento-item-titulo" hidden>Bigjonan Studio</h2>
+          <span class="bento-item-categoria" hidden><span lang="en">Booth design</span><span lang="es">Diseño de stands</span></span>
+        </a>
+       </div>
+      </div>
+    </section>
+
+    <!-- La sección de proyectos UX/UI se mudó a ux-ui.html: ahora es su
+         propia página, junto con Branding (branding.html) y 3D
+         (3d-modeling.html). Acá en el home solo queda la presentación
+         (Hello!), Programas, Skills y Contacto. -->
+
+    <!-- La sección Skills (habilidades de UX/UI) se mudó a ux-ui.html:
+         son habilidades específicas de esa disciplina, no algo
+         general del home. -->
+
+    <!-- ============================================================
+         GET IN TOUCH — titular + formulario de contacto
+
+         El formulario usa WEB3FORMS: los envíos te llegan por email,
+         sin backend ni base de datos. La clave ya está puesta.
+
+         OJO: solo funciona con el sitio PUBLICADO. Si abrís este
+         archivo con doble clic, el navegador bloquea el envío.
+         ============================================================ -->
+    <section id="get-in-touch" class="contacto" data-reveal-group>
+
+      <div class="contacto-texto" data-reveal>
+        <h2 class="contacto-titulo">
+          <span lang="en">Ready to take your product to the next level?</span>
+          <span lang="es">¿Listo para elevar el nivel de tu producto?</span>
+        </h2>
+        <p class="contacto-lead">
+          <span lang="en">Let&rsquo;s talk about how my experience can grow your business.</span>
+          <span lang="es">Hablemos de cómo mi experiencia puede hacer crecer tu negocio.</span>
+        </p>
+      </div>
+
+      <form class="contacto-form"
+            action="https://api.web3forms.com/submit"
+            method="POST"
+            data-reveal>
+
+        <!-- Tu clave de Web3Forms. Sin esto el formulario no envía. -->
+        <input type="hidden" name="access_key" value="1b6043e1-4f85-4c2c-814d-a2afacd2a529">
+
+        <!-- Asunto con el que te va a llegar el mail. Cambialo si querés. -->
+        <input type="hidden" name="subject" value="Nuevo mensaje desde el portfolio">
+
+        <!-- Trampa antispam de Web3Forms: no se ve, pero los robots la
+             marcan y así el envío se descarta. No la borres. -->
+        <input type="checkbox" name="botcheck" class="campo-trampa" tabindex="-1">
+
+        <div class="contacto-fila">
+          <div class="campo">
+            <label for="nombre"><span lang="en">Name</span><span lang="es">Nombre</span></label>
+            <!-- Los name de estos campos son los que espera Web3Forms:
+                 usa "email" para que puedas responder el mail directo a
+                 quien te escribió. -->
+            <input id="nombre" name="name" type="text" autocomplete="name" required>
+          </div>
+
+          <div class="campo">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="mensaje"><span lang="en">Message</span><span lang="es">Mensaje</span></label>
+          <textarea id="mensaje" name="message" rows="6" required></textarea>
+        </div>
+        <button type="submit" class="btn-primary contacto-enviar">
+          <span lang="en">Send</span><span lang="es">Enviar</span>
+          <span class="btn-icon">
+            <img src="assets/img/icon-arrow.svg" alt="" width="17" height="17">
+          </span>
+        </button>
+      </form>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       MODAL DE PROYECTO — igual que en ux-ui.html/branding.html/
+       3d-modeling.html. Se abre al hacer clic en una tarjeta del
+       carrusel "Proyectos recientes" (ver js/proyectos-bento.js).
+       ============================================================ -->
+  <div class="bento-modal" id="bento-modal" aria-hidden="true">
+    <div class="bento-modal-fondo" data-cerrar-modal></div>
+    <div class="bento-modal-caja" role="dialog" aria-modal="true" aria-labelledby="bento-modal-titulo">
+      <button type="button" class="bento-modal-cerrar" data-cerrar-modal aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="bento-modal-galeria">
+        <img class="bento-modal-imagen" id="bento-modal-imagen" src="" alt="">
+        <button type="button" class="bento-modal-nav bento-modal-prev" data-modal-prev aria-label="Previous image">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="bento-modal-nav bento-modal-next" data-modal-next aria-label="Next image">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="bento-modal-contador" id="bento-modal-contador"></span>
+      </div>
+
+      <div class="bento-modal-texto">
+        <div class="bento-modal-meta">
+          <span class="bento-modal-categoria" id="bento-modal-categoria"></span>
+          <span class="bento-modal-anio" id="bento-modal-anio"></span>
+        </div>
+        <h2 class="bento-modal-titulo" id="bento-modal-titulo"></h2>
+        <p class="bento-modal-caption" id="bento-modal-caption"></p>
+        <p class="bento-modal-subtitulo" id="bento-modal-subtitulo"></p>
+        <p class="bento-modal-descripcion" id="bento-modal-descripcion"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER — tres columnas sobre fondo oscuro
+       Para editar los textos, cambialos directamente acá abajo.
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="footer-interior">
+
+      <div class="footer-col">
+        <h2 class="footer-titulo"><span lang="en">Links</span><span lang="es">Enlaces</span></h2>
+        <ul class="footer-lista">
+          <li>
+            <!-- OJO: la dirección la armé con tu usuario, pero LinkedIn
+                 no siempre usa el mismo texto en la URL del perfil.
+                 Abrí tu perfil, copiá la dirección de la barra del
+                 navegador y pegala acá en el href. -->
+            <a class="footer-social" href="https://www.linkedin.com/in/cristianvelez92"
+               target="_blank" rel="noopener noreferrer">
+              <svg class="footer-icono" viewBox="0 0 24 24" width="18" height="18"
+                   fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <span>Cristianvelez92</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-titulo"><span lang="en">Navigation</span><span lang="es">Navegación</span></h2>
+        <ul class="footer-lista">
+          <li><a href="#hello"><span lang="en">Hello!</span><span lang="es">¡Hola!</span></a></li>
+          <li><a href="ux-ui.html">UX/UI</a></li>
+          <li><a href="branding.html">Branding</a></li>
+          <li><a href="3d-modeling.html">3D</a></li>
+          <li><a href="ux-ui.html#skills"><span lang="en">Skills</span><span lang="es">Habilidades</span></a></li>
+          <li><a href="#get-in-touch"><span lang="en">Contact</span><span lang="es">Contacto</span></a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-titulo"><span lang="en">Contact</span><span lang="es">Contacto</span></h2>
+        <ul class="footer-lista">
+          <li><a href="tel:+573104447785">+57 3104447785</a></li>
+          <li><a href="mailto:velezcristian92@gmail.com">velezcristian92@gmail.com</a></li>
+        </ul>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="js/projects.js"></script>
+  <script src="js/main.js?v=33"></script>
+  <script src="js/proyectos-bento.js?v=3"></script>
+</body>
+</html>

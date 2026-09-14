@@ -1,0 +1,109 @@
+/* ============================================================
+   TOKENS — valores extraídos del Figma
+   Todo color, tipografía y espaciado del sitio sale de acá.
+   Si cambias algo en el Figma, se cambia acá y se propaga solo.
+   ============================================================ */
+
+:root {
+
+  /* --- Colores ---
+     El sitio es solo modo oscuro (ya no hay selector de tema): estos
+     son los únicos valores, no hay una versión "clara" en ningún
+     lado. */
+  --color-bg: #0d0b09;             /* fondo oscuro y cálido de todo el sitio */
+  --color-ink: #f2efe9;            /* texto principal / pill activo */
+  --color-white: #ffffff;
+  --color-muted: #696969;          /* texto de items inactivos; #696969 es el valor que definió Cristian para .project-desc, no cambiarlo */
+  --color-modal-desc: #b0aca4;     /* descripción del modal de proyecto: más clara que --color-muted para mejor contraste (solo el modal, las cards siguen en #696969) */
+  --color-border: #3a3733;         /* borde del pill de navegación */
+  --color-accent: #6C5CE7;         /* violeta: ícono, "Cristian", botón */
+  --color-border-soft: #47433d;
+  --color-surface: #262420;        /* tarjetas: un escalón más claras que el fondo, no blancas */
+  --color-disabled: #55524c;       /* flecha del carrusel sin uso */
+  --color-error: #b3261e;          /* avisos de error del formulario */
+
+  /* Grises del footer, que va sobre fondo oscuro. Los dos pasan el
+     contraste AA sobre --color-footer-bg: 4.7:1 el título y 8.6:1 el
+     enlace. */
+  --color-footer-title: #8f8f8f;
+  --color-footer-link: #d0d0d0;
+  /* Un toque más clara que --color-bg: si quedara igual, el footer se
+     perdería contra la página y dejaría de leerse como una banda
+     aparte. */
+  --color-footer-bg: #2c2924;
+
+  /* Tarjeta oscura del Hello! (hero). */
+  --color-hero-bg: #1c1a17;
+  --color-hero-texto: #ffffff;
+  --color-hero-muted: rgba(255, 255, 255, 0.68);
+  /* Más oscuro que --color-bg: para la franja de "Programas", donde
+     los logos tienen que resaltar bien fuerte. */
+  --color-hero-bg-oscuro: #0d0b09;
+
+  --color-nav-surface: rgba(28, 26, 23, 0.5); /* fondo translúcido del pill */
+
+  /* Casi opaco: es el fondo del menú desplegado en celular. Tiene que
+     tapar lo de atrás para que los links se lean, cosa que la
+     translúcida de arriba no logra. */
+  --color-nav-surface-abierta: rgba(28, 26, 23, 0.96);
+
+  /* --- Relleno "fuerte" (pastilla activa del menú, botón al pasar el
+     mouse) y el color de texto que va ENCIMA de ese relleno. Un
+     relleno negro se perdería contra la página oscura, por eso es el
+     violeta de marca: sigue leyéndose como "esto está activo". Van
+     separados de --color-ink porque --color-ink es texto y este es un
+     bloque de color sólido. --- */
+  --color-fill-strong: var(--color-accent);
+  --color-on-fill-strong: var(--color-white);
+
+  /* --- Tipografía --- */
+  --font-display: 'Alexandria', system-ui, sans-serif;  /* nav, botones */
+  --font-ui: 'Archivo', system-ui, sans-serif;          /* nombre, antetítulos */
+  --font-black: 'Archivo Black', 'Archivo', system-ui, sans-serif; /* titulares grandes */
+  --font-body: 'Asta Sans', 'Archivo', system-ui, sans-serif;      /* párrafos */
+
+  --text-base: 1rem;              /* 16px */
+  --tracking-tight: -0.24px;
+
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Escalas tipográficas del hero.
+     clamp(mínimo en celular, cómo crece, máximo del Figma).
+     Los vw están calculados para dar EXACTO el valor del Figma a 1440px
+     (ej: 48px / 1440px = 3.34vw), y los mínimos están puestos para que la
+     jerarquía titular/párrafo no se aplaste en pantallas medianas. */
+  --text-eyebrow: clamp(1.25rem, 2.23vw, 2rem);     /* 20 → 32px */
+  --text-headline: clamp(2rem, 3.34vw, 3rem);       /* 32 → 48px */
+  --text-lead: clamp(1rem, 1.39vw, 1.25rem);        /* 16 → 20px */
+  /* La descripción del proyecto va 2px por debajo del lead */
+  --text-project-desc: clamp(0.875rem, 1.25vw, 1.125rem);  /* 14 → 18px */
+  --text-button: clamp(1rem, 1.39vw, 1.25rem);      /* 16 → 20px */
+
+  /* --- Espaciado --- */
+  --space-2: 5px;
+  --space-3: 10px;
+  --space-5: 20px;
+  --space-10: 40px;
+  --space-25: 100px;              /* margen lateral del header en desktop */
+
+  /* --- Radios --- */
+  --radius-pill: 50px;
+  --radius-item: 60px;
+  --radius-card: 40px;            /* tarjeta de proyecto */
+  --radius-media: 16px;           /* capturas del carrusel */
+  --radius-field: 12px;           /* campos del formulario de contacto */
+  --radius-header: 24px;          /* barra flotante del header */
+
+  /* --- Efectos --- */
+  --blur-nav: 7.5px;
+
+  /* --- Layout --- */
+  --header-height: 72px;          /* alto de la barra en desktop */
+  /* Al saltar a una sección, el header sticky la taparía. Este valor
+     (alto del header + aire) es cuánto se frena el scroll antes. */
+  --scroll-offset: 89px;          /* 65 del header en móvil + 24 de aire */
+  --nav-pad-x: var(--space-5);    /* padding lateral de cada link del menú */
+  --content-width: 1304px;        /* ancho del contenido en desktop */
+}

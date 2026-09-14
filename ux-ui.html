@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" data-idioma="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>UX/UI — Cristian Vélez</title>
+  <meta name="description" content="Proyectos de UX/UI y diseño de producto de Cristian Vélez.">
+
+  <!-- Google Analytics: mide visitas y métricas del sitio -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VSRY9CKKLL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VSRY9CKKLL');
+  </script>
+
+  <!-- Tipografías del Figma: Alexandria y Archivo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;700&family=Archivo:wght@400;600;700&family=Archivo+Black&family=Asta+Sans:wght@400&display=swap" rel="stylesheet">
+
+  <!-- Se ejecuta ANTES de que se pinte la página: marca que hay JS,
+       y elige el idioma guardado (ver el mismo bloque en index.html,
+       la explicación completa está ahí). El sitio es solo modo
+       oscuro: ya no hay selector de tema. -->
+  <script>
+    document.documentElement.classList.add('js-anim');
+    (function () {
+      var guardado = null;
+      try { guardado = localStorage.getItem('idioma'); } catch (e) {}
+      var idioma = (guardado === 'es' || guardado === 'en') ? guardado
+        : ((navigator.language || 'en').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+      document.documentElement.setAttribute('data-idioma', idioma);
+      document.documentElement.setAttribute('lang', idioma);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/tokens.css?v=6">
+  <link rel="stylesheet" href="css/styles.css?v=86">
+  <link rel="stylesheet" href="css/proyectos-bento.css?v=4">
+</head>
+<body>
+
+  <canvas id="fondo-red" class="fondo-red" aria-hidden="true"></canvas>
+
+  <div class="progreso" aria-hidden="true"><div class="progreso-barra"></div></div>
+
+  <!-- Botón flotante: esconde toda la página y deja solo el fondo
+       animado (estrellas + cometas) a pantalla completa. Ver "BOTÓN
+       VER LAS ESTRELLAS" en js/main.js y ".modo-espacio" en el CSS. -->
+  <button type="button" id="boton-espacio" class="boton-espacio" aria-pressed="false">
+    <span data-estado="ver"><span lang="en">View the stars</span><span lang="es">Ver las estrellas</span></span>
+    <span data-estado="volver" hidden><span lang="en">Back to the site</span><span lang="es">Volver al sitio</span></span>
+  </button>
+
+  <!-- ============================================================
+       HEADER — igual que en index.html. Si cambiás un texto o un
+       link acá, hacé el mismo cambio en index.html, branding.html
+       y 3d-modeling.html para que las cuatro páginas queden iguales.
+       ============================================================ -->
+  <header class="site-header">
+
+    <button class="nav-toggle" type="button"
+            aria-expanded="false" aria-controls="menu-principal"
+            aria-label="Abrir menú">
+      <span class="nav-toggle-linea"></span>
+      <span class="nav-toggle-linea"></span>
+      <span class="nav-toggle-linea"></span>
+    </button>
+
+    <a href="index.html#hello" class="brand-nombre">Cristian Vélez</a>
+
+    <div class="idioma-toggle" role="group" aria-label="Language / Idioma">
+      <button type="button" class="idioma-boton" data-idioma-set="en">EN</button>
+      <button type="button" class="idioma-boton" data-idioma-set="es">ES</button>
+    </div>
+
+    <nav class="nav-pill" id="menu-principal" aria-label="Navegación principal">
+      <a href="index.html#hello" class="nav-item"><span lang="en">Hello!</span><span lang="es">¡Hola!</span></a>
+      <a href="ux-ui.html" class="nav-item">UX/UI</a>
+      <a href="branding.html" class="nav-item"><span lang="en">Branding &amp; Visual</span><span lang="es">Branding &amp; Visual</span></a>
+      <a href="3d-modeling.html" class="nav-item">3D</a>
+      <a href="index.html#get-in-touch" class="nav-item nav-cta">
+        <span lang="en">Let&rsquo;s connect</span><span lang="es">Conectemos</span>
+        <span class="nav-cta-icono"><img src="assets/img/icon-arrow.svg" alt="" width="14" height="14"></span>
+      </a>
+    </nav>
+
+    <div class="brand">
+      <a href="index.html#get-in-touch" class="nav-item nav-cta">
+        <span lang="en">Let&rsquo;s connect</span><span lang="es">Conectemos</span>
+        <span class="nav-cta-icono"><img src="assets/img/icon-arrow.svg" alt="" width="14" height="14"></span>
+      </a>
+
+    </div>
+
+  </header>
+
+
+  <main>
+
+    <!-- ============================================================
+         TÍTULO DE LA PÁGINA
+         ============================================================ -->
+    <section class="pagina-intro pagina-intro-foto" data-reveal-group>
+
+      <!-- Foto de fondo + degradado naranja encima (mismo mecanismo
+           que el Hello del home, incluido el degradado que sigue al
+           mouse). Para cambiar la foto, reemplazá
+           assets/perfil/hero-foto-ux-ui.jpg manteniendo el nombre. -->
+      <div class="pagina-fondo" aria-hidden="true">
+        <img src="assets/perfil/hero-foto-ux-ui.jpg" alt="">
+      </div>
+
+      <div class="pagina-intro-contenido">
+        <p class="pagina-eyebrow" data-reveal>UX/UI Product Design</p>
+        <h1 class="pagina-titulo" data-reveal>
+          <span lang="en">Critical thinking. User empathy. Better products.</span>
+          <span lang="es">Pensamiento crítico. Empatía con el usuario. Mejores productos.</span>
+        </h1>
+        <p class="pagina-desc" data-reveal>
+          <span lang="en">I design digital products end to end, from the first idea and discovery
+            all the way to a real product that's ready for development.</span>
+          <span lang="es">Diseño productos digitales de principio a fin, transformando desde la
+            primera idea y el discovery hasta un producto real y listo para desarrollo.</span>
+        </p>
+
+        <!-- Lleva a la sección de proyectos (#projects, más abajo);
+             ya tiene scroll-margin-top para no quedar tapada por el
+             header fijo (ver "main > section[id]" en el CSS). -->
+        <a class="btn-secundario" href="#projects" data-reveal>
+          <span lang="en">View projects</span><span lang="es">Ver proyectos</span>
+        </a>
+
+        <!-- Fila de especialidades numeradas + años de experiencia,
+             a modo de remate. Para agregar o quitar una especialidad,
+             copiá uno de los <div class="pagina-stat"> y sumalo o
+             borralo; el número (#01, #02...) es solo texto, así que
+             hay que corregirlo a mano si cambia el orden. -->
+        <div class="pagina-stats" data-reveal>
+          <div class="pagina-stat pagina-stat-destacado">
+            <span class="pagina-stat-titulo">
+              <span lang="en">+4 years<br>experience</span>
+              <span lang="es">+4 años<br>de experiencia</span>
+            </span>
+          </div>
+          <div class="pagina-stat">
+            <span class="pagina-stat-num">#01</span>
+            <span class="pagina-stat-titulo">SaaS</span>
+          </div>
+          <div class="pagina-stat">
+            <span class="pagina-stat-num">#02</span>
+            <span class="pagina-stat-titulo">B2B</span>
+          </div>
+          <div class="pagina-stat">
+            <span class="pagina-stat-num">#03</span>
+            <span class="pagina-stat-titulo">B2C</span>
+          </div>
+          <div class="pagina-stat">
+            <span class="pagina-stat-num">#04</span>
+            <span class="pagina-stat-titulo"><span lang="en">Websites</span><span lang="es">Sitios web</span></span>
+          </div>
+          <div class="pagina-stat">
+            <span class="pagina-stat-num">#05</span>
+            <span class="pagina-stat-titulo"><span lang="en">Landing</span><span lang="es">Landing</span></span>
+          </div>
+          <div class="pagina-stat">
+            <span class="pagina-stat-num">#06</span>
+            <span class="pagina-stat-titulo"><span lang="en">Dashboards</span><span lang="es">Dashboards</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SKILLS — etiquetas de habilidades de UX/UI.
+         Para agregar o quitar una etiqueta, edita su <li>.
+         ============================================================ -->
+    <section id="skills" class="skills">
+      <div class="skills-contenido">
+
+      <div class="skills-group" data-reveal-group>
+        <h2 class="skills-heading" data-reveal><span lang="en">Skills</span><span lang="es">Habilidades</span></h2>
+
+        <!-- Carrusel: una sola fila que no se corta nunca. El JS
+             ("CARRUSEL DE ETIQUETAS" en js/main.js) mide si las
+             etiquetas entran en el ancho disponible; si no entran,
+             las duplica y las hace desplazarse solas, muy despacio,
+             en loop infinito. Para agregar o quitar una etiqueta,
+             editá solo esta lista: el JS se encarga del resto. -->
+        <div class="tag-marquee" data-marquee>
+          <ul class="tag-list">
+            <li data-reveal><span lang="en">UX/UI Design</span><span lang="es">Diseño UX/UI</span></li>
+            <li data-reveal><span lang="en">User-Centered Design</span><span lang="es">Diseño centrado en el usuario</span></li>
+            <li data-reveal><span lang="en">AI Assisted Prototyping</span><span lang="es">Prototipado asistido por IA</span></li>
+            <li data-reveal><span lang="en">Wireframing</span><span lang="es">Wireframing</span></li>
+            <li data-reveal><span lang="en">User Flows</span><span lang="es">Flujos de usuario</span></li>
+            <li data-reveal><span lang="en">Hi &amp; Lo-Fi Prototyping</span><span lang="es">Prototipado de alta y baja fidelidad</span></li>
+            <li data-reveal><span lang="en">Design Systems</span><span lang="es">Sistemas de diseño</span></li>
+            <li data-reveal><span lang="en">Usability Testing</span><span lang="es">Test de usabilidad</span></li>
+            <li data-reveal><span lang="en">Information Architecture</span><span lang="es">Arquitectura de información</span></li>
+            <li data-reveal><span lang="en">Responsive Design</span><span lang="es">Diseño responsive</span></li>
+            <li data-reveal><span lang="en">Design Thinking</span><span lang="es">Design Thinking</span></li>
+            <li data-reveal><span lang="en">Design-to-Dev Handoff</span><span lang="es">Entrega a desarrollo</span></li>
+            <li data-reveal><span lang="en">Visual Identity</span><span lang="es">Identidad visual</span></li>
+          </ul>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <hr class="separador">
+
+    <!-- ============================================================
+         PROJECTS — mismo formato que "Proyectos recientes" del home
+         (grilla de vidrio con bordes internos), pero acá cada tarjeta
+         abre el modal con la galería completa en vez de navegar a
+         otra página (ver css/proyectos-bento.css y js/proyectos-bento.js).
+
+         Cada <article class="bento-item"> es un proyecto:
+         - data-proyecto identifica su carpeta en js/projects.js (ahí
+           van las imágenes de la galería, en el mismo orden).
+         - .bento-item-categoria se ve en la tarjeta; .bento-badge-anio
+           va oculto (solo lo usa el modal).
+         - .bento-item-subtitulo y .bento-item-desc-completa van ocultos
+           en la tarjeta: son los textos que se muestran recién al
+           abrir el modal.
+         ============================================================ -->
+    <section id="projects" class="bento-grid">
+      <div class="bento-grid-vidrio">
+
+      <!-- ── Proyecto 1 ───────────────────────────────────────────── -->
+      <article class="bento-item" data-proyecto="doqmind-platform" tabindex="0">
+        <div class="bento-item-fondo">
+          <img src="assets/projects/doqmind-platform/01-projects.png" alt="" class="bento-img bento-img-activa">
+        </div>
+        <div class="bento-item-info">
+          <span class="bento-item-texto">
+            <h2 class="bento-item-titulo">DOQMIND</h2>
+            <span class="bento-item-categoria">SaaS</span>
+          </span>
+          <span class="bento-item-flecha" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true" focusable="false">
+              <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="bento-badge-anio" hidden><span lang="en">2023–Present</span><span lang="es">2023–Presente</span></span>
+        <p class="bento-item-subtitulo" hidden>
+          <span lang="en">Workflow and assets management platform</span>
+          <span lang="es">Plataforma de gestión de flujos de trabajo y activos</span>
+        </p>
+        <p class="bento-item-desc-completa" hidden>
+          <span lang="en">I stepped into this project with the platform already live to fix critical issues:
+            poorly optimized workflows causing bottlenecks and inconsistent interfaces that felt tedious to
+            users. I redesigned dozens of screens and built a structured design system with a clear, versatile
+            visual identity tailored for client customization. Ultimately, we optimized user task times and
+            provided a much simpler way to search for files and manage projects.</span>
+          <span lang="es">Entré a este proyecto con la plataforma ya en marcha para resolver problemas
+            críticos: flujos mal optimizados que generaban cuellos de botella e interfaces sin consistencia
+            visual que resultaban tediosas para el usuario. Rediseñé decenas de pantallas y estructuré un
+            sistema de diseño con una identidad visual clara y versátil para la personalización de cada
+            cliente. Al final, logramos optimizar los tiempos de trabajo de los usuarios y les dimos una
+            forma mucho más sencilla de buscar archivos y gestionar sus proyectos.</span>
+        </p>
+      </article>
+
+      <!-- ── Proyecto 2 ───────────────────────────────────────────── -->
+      <article class="bento-item" data-proyecto="doqmind-viewer" tabindex="0">
+        <div class="bento-item-fondo">
+          <img src="assets/projects/doqmind-viewer/01-general.jpg" alt="" class="bento-img bento-img-activa">
+        </div>
+        <div class="bento-item-info">
+          <span class="bento-item-texto">
+            <h2 class="bento-item-titulo">DOQMIND</h2>
+            <span class="bento-item-categoria">SaaS</span>
+          </span>
+          <span class="bento-item-flecha" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true" focusable="false">
+              <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="bento-badge-anio" hidden><span lang="en">2023–Present</span><span lang="es">2023–Presente</span></span>
+        <p class="bento-item-subtitulo" hidden>
+          <span lang="en">Collaborative asset viewer</span>
+          <span lang="es">Visor colaborativo de assets</span>
+        </p>
+        <p class="bento-item-desc-completa" hidden>
+          <span lang="en">I designed this interface from scratch based on an initial set of technical
+            requirements and collaborative tools. I mapped out interaction flows and structured a
+            workspace where complex features—such as distance measuring, color layer inspection,
+            barcode analysis, multi-page viewing, and live commenting—could coexist seamlessly.
+            The tool is currently live, used in real-time operations, and continuously evolving.</span>
+          <span lang="es">Diseñé esta interfaz desde cero a partir de una lista inicial de
+            requerimientos técnicos y herramientas colaborativas. Me encargué de diagramar
+            las interacciones y estructurar un espacio de trabajo donde funciones complejas
+            como medición de distancias, inspección de capas de color, códigos de barras,
+            paginado y comentarios en tiempo real convivieran de manera intuitiva y sin choques
+            operativos. La herramienta está completamente funcional, es utilizada en tiempo real
+            por los clientes de la compañía y continúa sumando mejoras.</span>
+        </p>
+      </article>
+
+      <!-- ── Proyecto 3 ───────────────────────────────────────────── -->
+      <article class="bento-item" data-proyecto="omega-security" tabindex="0">
+        <div class="bento-item-fondo">
+          <img src="assets/projects/omega-security/01-menu-navegacion.jpg" alt="" class="bento-img bento-img-activa">
+        </div>
+        <div class="bento-item-info">
+          <span class="bento-item-texto">
+            <h2 class="bento-item-titulo">Omega Security</h2>
+            <span class="bento-item-categoria">B2B</span>
+          </span>
+          <span class="bento-item-flecha" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true" focusable="false">
+              <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="bento-badge-anio" hidden>2022</span>
+        <p class="bento-item-subtitulo" hidden>
+          <span lang="en">Residential unit access management platform</span>
+          <span lang="es">Plataforma de gestión de accesos para unidades residenciales</span>
+        </p>
+        <p class="bento-item-desc-completa" hidden>
+          <span lang="en">I designed from scratch the platform used by security guards
+            and coordinators in residential complexes to manage access logs, parcel
+            deliveries, and incident reports. To understand the real-world context,
+            I conducted field research directly at guard posts, interviewing staff
+            to map out time-critical actions. Based on these insights, I structured an
+            intuitive layout with role-based access that streamlined the daily operations
+            of the security team. The platform is currently live and actively running
+            across the company's residential sites.</span>
+          <span lang="es">Diseñé desde cero la plataforma que utilizan los vigilantes y
+            coordinadores en unidades residenciales para gestionar accesos, paquetería y
+            minutas de seguridad. Para entender las necesidades reales del entorno,
+            realicé investigación de campo directamente en las porterías, entrevistando
+            al personal operativo para mapear las tareas más críticas e inmediatas. Con
+            esta información, definí un layout intuitivo y un sistema de permisos por
+            roles que simplificó la rutina diaria del equipo de seguridad. La plataforma
+            se encuentra completamente funcional, operando en tiempo real en los
+            proyectos residenciales de la empresa.</span>
+        </p>
+      </article>
+
+      <!-- ── Proyecto 4 ───────────────────────────────────────────── -->
+      <article class="bento-item" data-proyecto="ciat-cgiar-foresight" tabindex="0">
+        <div class="bento-item-fondo">
+          <img src="assets/projects/ciat-cgiar-foresight/01-home.jpg" alt="" class="bento-img bento-img-activa">
+        </div>
+        <div class="bento-item-info">
+          <span class="bento-item-texto">
+            <h2 class="bento-item-titulo">CIAT &amp; CGIAR foresight</h2>
+            <span class="bento-item-categoria">Dashboards</span>
+          </span>
+          <span class="bento-item-flecha" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true" focusable="false">
+              <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="bento-badge-anio" hidden>2021</span>
+        <p class="bento-item-subtitulo" hidden>
+          <span lang="en">Website and interactive dashboard</span>
+          <span lang="es">Sitio web y tablero interactivo</span>
+        </p>
+        <p class="bento-item-desc-completa" hidden>
+          <span lang="en">I designed an interactive dashboard for CIAT and CGIAR
+            Foresight focused on visualizing open-data across socio-economic and food
+            systems. My role was to structure and categorize complex variables
+            (environmental, social, energy, and consumer choice) into a clear overview
+            of country-level performance in regions like Ethiopia, Honduras, and
+            Bangladesh. The tool is currently active and supports the organization’s
+            ongoing foresight research.</span>
+          <span lang="es">Diseñé un dashboard interactivo para CIAT y CGIAR Foresight
+            enfocado en la visualización de datos abiertos sobre sistemas alimentarios y
+            socioeconómicos. Mi rol fue estructurar y categorizar variables complejas
+            (ambientales, sociales, energéticas y de consumo) para presentar una visión
+            clara de la situación país en regiones como Etiopía, Honduras y Bangladesh. La herramienta está
+            operativa y permite a la organización analizar la salud general de estas
+            variables para respaldar sus investigaciones prospectivas.</span>
+        </p>
+      </article>
+
+      <!-- ── Proyecto 5 ───────────────────────────────────────────── -->
+      <article class="bento-item" data-proyecto="le-grand-frances-bakery" tabindex="0">
+        <div class="bento-item-fondo">
+          <img src="assets/projects/le-grand-frances-bakery/01-home.jpg" alt="" class="bento-img bento-img-activa">
+        </div>
+        <div class="bento-item-info">
+          <span class="bento-item-texto">
+            <h2 class="bento-item-titulo">Le grand francés bakery</h2>
+            <span class="bento-item-categoria">B2C</span>
+          </span>
+          <span class="bento-item-flecha" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true" focusable="false">
+              <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="bento-badge-anio" hidden>2020</span>
+        <p class="bento-item-subtitulo" hidden>
+          <span lang="en">Online sales platform</span>
+          <span lang="es">Plataforma de ventas online</span>
+        </p>
+        <p class="bento-item-desc-completa" hidden>
+          <span lang="en">I designed the e-commerce platform for Le Grand Francés,
+            covering everything from brand presentation to catalog management and the
+            full checkout/delivery flow for both retail and wholesale orders. The live
+            platform optimized business operations by centralizing order intake,
+            logistics, and payments into a single, intuitive channel.</span>
+          <span lang="es">Diseñé la plataforma de e-commerce para la panadería Le
+            Grand Francés, cubriendo desde la presentación de marca hasta el catálogo y
+            flujo completo de pago y envío para ventas minoristas y al por mayor. El
+            sitio web optimizó la operación del negocio al centralizar la recepción de
+            pedidos, organizando la logística y la facturación a través de un canal
+            digital claro y 100% operativo.</span>
+        </p>
+      </article>
+
+      <!-- ── Proyecto 6 ───────────────────────────────────────────── -->
+      <article class="bento-item" data-proyecto="driven-properties-latam" tabindex="0">
+        <div class="bento-item-fondo">
+          <img src="assets/projects/driven-properties-latam/01-destacados.jpg" alt="" class="bento-img bento-img-activa">
+        </div>
+        <div class="bento-item-info">
+          <span class="bento-item-texto">
+            <h2 class="bento-item-titulo">Driven properties LATAM</h2>
+            <span class="bento-item-categoria"><span lang="en">Websites</span><span lang="es">Sitios web</span></span>
+          </span>
+          <span class="bento-item-flecha" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true" focusable="false">
+              <path d="M7 17L17 7M17 7H8M17 7V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="bento-badge-anio" hidden>2020</span>
+        <p class="bento-item-subtitulo" hidden>
+          <span lang="en">Website</span>
+          <span lang="es">Sitio web</span>
+        </p>
+        <p class="bento-item-desc-completa" hidden>
+          <span lang="en">I designed the regional digital platform for Driven Properties
+            LATAM, tailored for real estate investment and discovery in Dubai. I
+            structured the user experience to highlight market benefits, map out key
+            neighborhoods, and present an interactive catalog for buying, selling, or
+            listing properties for rent.</span>
+          <span lang="es">Diseñé la plataforma digital de Driven Properties para el
+            mercado latinoamericano, orientada a la consulta e inversión inmobiliaria
+            en Dubái. Estructuré la experiencia para educar al usuario sobre
+            los beneficios del mercado, presentar un mapa de zonas clave y desplegar
+            un catálogo interactivo de propiedades para compra, venta o alquiler,
+            además de permitir a los propietarios postular sus inmuebles.</span>
+        </p>
+      </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       MODAL DE PROYECTO — se abre al hacer clic en una tarjeta del
+       bento grid. El JS (js/proyectos-bento.js) arma el carrusel de
+       capturas y el texto adentro.
+       ============================================================ -->
+  <div class="bento-modal" id="bento-modal" aria-hidden="true">
+    <div class="bento-modal-fondo" data-cerrar-modal></div>
+    <div class="bento-modal-caja" role="dialog" aria-modal="true" aria-labelledby="bento-modal-titulo">
+      <button type="button" class="bento-modal-cerrar" data-cerrar-modal aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="bento-modal-galeria">
+        <img class="bento-modal-imagen" id="bento-modal-imagen" src="" alt="">
+        <button type="button" class="bento-modal-nav bento-modal-prev" data-modal-prev aria-label="Previous image">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="bento-modal-nav bento-modal-next" data-modal-next aria-label="Next image">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="bento-modal-contador" id="bento-modal-contador"></span>
+      </div>
+
+      <div class="bento-modal-texto">
+        <div class="bento-modal-meta">
+          <span class="bento-modal-categoria" id="bento-modal-categoria"></span>
+          <span class="bento-modal-anio" id="bento-modal-anio"></span>
+        </div>
+        <h2 class="bento-modal-titulo" id="bento-modal-titulo"></h2>
+        <p class="bento-modal-caption" id="bento-modal-caption"></p>
+        <p class="bento-modal-subtitulo" id="bento-modal-subtitulo"></p>
+        <p class="bento-modal-descripcion" id="bento-modal-descripcion"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER — igual que en index.html.
+       ============================================================ -->
+  <footer class="site-footer" id="pie-de-pagina">
+    <div class="footer-interior">
+
+      <div class="footer-col">
+        <h2 class="footer-titulo"><span lang="en">Links</span><span lang="es">Enlaces</span></h2>
+        <ul class="footer-lista">
+          <li>
+            <a class="footer-social" href="https://www.linkedin.com/in/cristianvelez92"
+               target="_blank" rel="noopener noreferrer">
+              <svg class="footer-icono" viewBox="0 0 24 24" width="18" height="18"
+                   fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <span>Cristianvelez92</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-titulo"><span lang="en">Navigation</span><span lang="es">Navegación</span></h2>
+        <ul class="footer-lista">
+          <li><a href="index.html#hello"><span lang="en">Hello!</span><span lang="es">¡Hola!</span></a></li>
+          <li><a href="ux-ui.html">UX/UI</a></li>
+          <li><a href="branding.html">Branding</a></li>
+          <li><a href="3d-modeling.html">3D</a></li>
+          <li><a href="ux-ui.html#skills"><span lang="en">Skills</span><span lang="es">Habilidades</span></a></li>
+          <li><a href="index.html#get-in-touch"><span lang="en">Contact</span><span lang="es">Contacto</span></a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-titulo"><span lang="en">Contact</span><span lang="es">Contacto</span></h2>
+        <ul class="footer-lista">
+          <li><a href="tel:+573104447785">+57 3104447785</a></li>
+          <li><a href="mailto:velezcristian92@gmail.com">velezcristian92@gmail.com</a></li>
+        </ul>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="js/projects.js"></script>
+  <script src="js/main.js?v=33"></script>
+  <script src="js/proyectos-bento.js?v=3"></script>
+</body>
+</html>
