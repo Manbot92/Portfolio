@@ -106,6 +106,22 @@ const PROJECTS = {
     ]
   },
 
+  /* Primero las pantallas mobile y después las de desktop. En desktop el
+     orden sigue el recorrido del administrador: ve sus menús, crea uno,
+     le define los horarios, entra a una categoría y agrega un producto. */
+  'wonder-menu': {
+    folder: 'assets/projects/wonder-menu/',
+    images: [
+      { file: '01-mobile-menus-producto-nuevo-menu.png',   caption: 'Mobile — menus list, new product and new menu' },
+      { file: '02-mobile-categorias-menu-etiquetas.png',   caption: 'Mobile — categories, menu detail and product tags' },
+      { file: '03-desktop-mis-menus.png',                  caption: 'My menus' },
+      { file: '04-desktop-menu-creado.png',                caption: 'Menu created' },
+      { file: '05-desktop-editar-horarios.png',            caption: 'Edit schedules' },
+      { file: '06-desktop-categoria-cocteles.png',         caption: 'Category and products list' },
+      { file: '07-desktop-nuevo-producto.png',             caption: 'New product with live preview' },
+    ]
+  },
+
   /* ============================================================
      BRANDING — VISUAL COMMUNICATION DESIGN
      ============================================================ */
