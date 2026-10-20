@@ -38,7 +38,9 @@
     function armarImagenes() {
       if (imagenes) return;
       imagenes = [imgInicial];
-      datos.images.slice(1).forEach(function (foto) {
+      datos.images.forEach(function (foto) {
+        // la portada ya está puesta: no se repite en el ciclo
+        if (imgInicial.getAttribute('src') === datos.folder + foto.file) return;
         var img = document.createElement('img');
         img.className = 'bento-img';
         img.alt = '';
