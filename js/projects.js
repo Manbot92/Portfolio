@@ -52,6 +52,16 @@ const PROJECTS = {
     ]
   },
 
+  /* Las dos láminas van en el orden de uso de la app: entrar, navegar el
+     menú y la bitácora; luego analíticas, inicio y registro de una cirugía. */
+  'praxilog': {
+    folder: 'assets/projects/praxilog/',
+    images: [
+      { file: '01-mobile-login-menu-bitacora.jpg',          caption: 'Mobile — login, menu and procedures log' },
+      { file: '02-mobile-analiticas-inicio-nueva-cirugia.jpg', caption: 'Mobile — analytics, home and new surgery form' },
+    ]
+  },
+
   /* El orden de esta lista es el orden del carrusel. Para reordenarlo,
      mové las líneas de lugar (no hace falta renombrar los archivos). */
   'omega-security': {
