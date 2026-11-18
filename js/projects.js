@@ -52,13 +52,22 @@ const PROJECTS = {
     ]
   },
 
-  /* Las dos láminas van en el orden de uso de la app: entrar, navegar el
-     menú y la bitácora; luego analíticas, inicio y registro de una cirugía. */
-  'praxilog': {
-    folder: 'assets/projects/praxilog/',
+  /* Las dos láminas van en el orden de uso de la app: inicio y registro de
+     un procedimiento; luego el listado, la selección para el reporte y el menú. */
+  'praxico': {
+    folder: 'assets/projects/praxico/',
     images: [
-      { file: '01-mobile-login-menu-bitacora.jpg',          caption: 'Mobile — login, menu and procedures log' },
-      { file: '02-mobile-analiticas-inicio-nueva-cirugia.jpg', caption: 'Mobile — analytics, home and new surgery form' },
+      { file: '01-mobile-inicio-nuevo-procedimiento.jpg',      caption: 'Mobile — home, new procedure form and procedure search' },
+      { file: '02-mobile-mis-procedimientos-reporte-menu.jpg', caption: 'Mobile — procedures list, report selection and menu' },
+    ]
+  },
+
+  'marcacion-en-linea': {
+    folder: 'assets/projects/marcacion-en-linea/',
+    images: [
+      { file: '01.jpg', caption: 'Mobile — home, pre-round check and round in progress' },
+      { file: '02.jpg', caption: 'Mobile — station marked, incident report and tag scan' },
+      { file: '03.jpg', caption: 'Mobile — incident list, finish round and saved round' },
     ]
   },
 
