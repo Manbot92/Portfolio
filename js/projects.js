@@ -37,6 +37,9 @@ const PROJECTS = {
       { file: '04-tasks.png',                   caption: 'Tasks' },
       { file: '05-assets-module.png',           caption: 'Assets module' },
       { file: '06-assets-module-list-view.png', caption: 'Assets module list view' },
+      { file: '07.jpg',                         caption: 'Process overview with execution tree' },
+      { file: '08.jpg',                         caption: 'Process flow diagram' },
+      { file: '09.jpg',                         caption: 'Project timeline and critical path' },
     ]
   },
 
@@ -131,13 +134,14 @@ const PROJECTS = {
   'wonder-menu': {
     folder: 'assets/projects/wonder-menu/',
     images: [
-      { file: '01-mobile-menus-producto-nuevo-menu.png',   caption: 'Mobile — menus list, new product and new menu' },
-      { file: '02-mobile-categorias-menu-etiquetas.png',   caption: 'Mobile — categories, menu detail and product tags' },
-      { file: '03-desktop-mis-menus.png',                  caption: 'My menus' },
+      { file: '01-mobile-menus-producto-nuevo-menu.jpg',   caption: 'Mobile — menus list, new product and new menu' },
+      { file: '02-mobile-categorias-menu-etiquetas.jpg',   caption: 'Mobile — categories, menu detail and product tags' },
+      { file: '03-mobile-estilo.jpg',                      caption: 'Mobile — style editor: colors, cover and shapes' },
+      { file: '05-desktop-mis-menus.png',                  caption: 'My menus' },
       { file: '04-desktop-menu-creado.png',                caption: 'Menu created' },
-      { file: '05-desktop-editar-horarios.png',            caption: 'Edit schedules' },
+      { file: '07-desktop-editar-horarios.png',            caption: 'Edit schedules' },
       { file: '06-desktop-categoria-cocteles.png',         caption: 'Category and products list' },
-      { file: '07-desktop-nuevo-producto.png',             caption: 'New product with live preview' },
+      { file: '08-desktop-nuevo-producto.png',             caption: 'New product with live preview' },
     ]
   },
 
